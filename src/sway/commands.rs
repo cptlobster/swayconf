@@ -96,16 +96,16 @@ pub enum SubMove {
 impl Display for Commands {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self {
-            Commands::Bar{bar_id, subcommands} => { write!(f, "bar {} {{{:?}}})", bar_id, subcommands) }
+            Commands::Bar{bar_id, subcommands} => { write!(f, "bar {} {{\n{}\n}})", bar_id, subcommands) }
             Commands::Bindsym{flags, keys, command} => {
                 match *command.clone() {
                     Runtime::Bindsym{flags: _, keys: _, command: _} => panic!("Nested bindsyms are not allowed"),
                     c => {
                         let key_str = keys.join("+");
-                        if flags.is_empty() { write!(f, "bindsym {} \"{}\"", key_str, c) }
+                        if flags.is_empty() { write!(f, "bindsym {} {}", key_str, c) }
                         else {
                             let flag_str = flags.iter().map(|bsf| bsf.to_string()).collect::<Vec<String>>().join(" ");
-                            write!(f, "bindsym {} {} \"{}\"", flag_str, key_str, c)
+                            write!(f, "bindsym {} {} {}", flag_str, key_str, c)
                         }
                     }
                 }
@@ -117,7 +117,7 @@ impl Display for Commands {
             Commands::Exit => { write!(f, "exit") }
             Commands::Focus(focus) => { write!(f, "focus {}", focus) }
             Commands::Floating(val) => { write!(f, "floating {}", val) }
-            Commands::Include(path) => { write!(f, "include {}", path) }
+            Commands::Include(path) => { write!(f, "include {}", path.display()) }
             Commands::Kill => { write!(f, "kill") }
             Commands::Layout(layout) => { write!(f, "layout {}", layout) }
             Commands::Move(movement) => { write!(f, "move {}", movement) }
@@ -231,7 +231,7 @@ mod tests {
         // the configuration strings as they would appear in swayconf
         let res1 = "exec /bin/bash".to_string();
         let res2 = "layout tabbed".to_string();
-        let res3 = format!("bindsym Mod4+a \"{}\"", res1);
+        let res3 = format!("bindsym Mod4+a {}", res1);
         let res_comment = "# this is a test comment".to_string();
 
         assert_eq!(command1.to_string(), res1);
