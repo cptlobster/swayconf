@@ -16,6 +16,7 @@
 use subenum::subenum;
 use crate::sway::options;
 use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::path::PathBuf;
 
 /// All top-level command declarations. These are developed using the criteria specified in the `sway(5)` manpage.
 #[subenum(Config, Runtime)]
@@ -55,6 +56,8 @@ pub enum Commands {
     Else(String),
     #[subenum(Config)]
     Comment(String),
+    #[subenum(Config)]
+    Include(PathBuf),
 }
 
 /// Subcommands for focus.
@@ -114,6 +117,7 @@ impl Display for Commands {
             Commands::Exit => { write!(f, "exit") }
             Commands::Focus(focus) => { write!(f, "focus {}", focus) }
             Commands::Floating(val) => { write!(f, "floating {}", val) }
+            Commands::Include(path) => { write!(f, "include {}", path) }
             Commands::Kill => { write!(f, "kill") }
             Commands::Layout(layout) => { write!(f, "layout {}", layout) }
             Commands::Move(movement) => { write!(f, "move {}", movement) }
