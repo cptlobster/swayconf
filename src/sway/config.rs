@@ -16,27 +16,70 @@
 
 use crate::sway::commands::Commands;
 use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::fs::File;
+use std::io::{Write, Result};
+use std::io::ErrorKind::NotFound;
+use std::path::PathBuf;
+use std::ptr::null;
+use homedir::my_home;
 
-pub struct Config {
+/// A single configuration file
+pub struct ConfigFile {
+    path: PathBuf,
     commands: Vec<Commands>
 }
 
-impl Config {
-    fn new(commands: Vec<Commands>) -> Config {
-        Config{ commands }
+impl ConfigFile {
+    /// Create a new config file
+    fn new(path: PathBuf, commands: Vec<Commands>) -> ConfigFile {
+        ConfigFile{ path, commands }
     }
 
-    fn concat(self, other: Config) -> Config {
+    /// Create a new config file at the default location (`~/.config/sway/config`)
+    fn default(commands: Vec<Commands>) -> ConfigFile {
+        let default_loc: PathBuf = my_home().unwrap().unwrap().join(".config/sway/config");
+        ConfigFile::new(default_loc, commands)
+    }
+
+    /// Concatenate two config files (keeps the left file's name)
+    fn concat(self, other: ConfigFile) -> ConfigFile {
         let mut new_cmds: Vec<Commands> = self.commands;
         let mut other_cmds: Vec<Commands> = other.commands;
         new_cmds.append(&mut other_cmds);
-        Config::new(new_cmds)
+        ConfigFile::new(self.path, new_cmds)
+    }
+
+    fn write(self) -> Result<File> {
+        File::open(self.path)
+            .and_then(|mut f| {f.write(self.commands.to_string())})
     }
 }
 
 // this will let us convert the entire config struct into a single string representation
-impl Display for Config {
+impl Display for ConfigFile {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.commands.iter().map(|c| c.to_string()).collect::<Vec<String>>().join("\n"))
+    }
+}
+
+/// A group of config files (ideally connected via include statements)
+pub struct ConfigGroup {
+    files: Vec<ConfigFile>
+}
+
+impl ConfigGroup {
+    fn flatten(self) -> ConfigFile {
+        self.files.iter().cloned().reduce(|left, right| left.concat(right)).unwrap()
+    }
+
+    fn write(self) -> Result<File> {
+        let mut result: Result<File> = Err(NotFound.into());
+        for file in self.files {
+            match file.write() {
+                Err(err) => { result = Err(err); break; }
+                ok => result = ok,
+            }
+        }
+        result
     }
 }
