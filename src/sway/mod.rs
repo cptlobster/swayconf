@@ -16,3 +16,4 @@
 mod commands;
 mod options;
 mod config;
+mod toml;
