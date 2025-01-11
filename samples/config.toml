@@ -126,6 +126,17 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 "$mod+l".exec = { command = "$lock_sh", no-startup-id = true }
 "$mod+Shift+e".exec.command = "rofi -show p -modi p:rofi-power-menu"
 
+# resize mode bindsyms
+[modes.resize.bindsym]
+"Up".resize = { change = "shrink", height = 10, px = true }
+"Down".resize = { change = "grow", height = 10, px = true }
+"Left".resize = { change = "shrink", width = 10, px = true }
+"Right".resize = { change = "grow", width = 10, px = true }
+"Return".mode = "default"
+"Escape".mode = "default"
+"$mod+r".mode = "default"
+
+
 [bindcode]
 "233".exec = { command = "$ch_bright_sh +5%", no-startup-id = true }
 "232".exec = { command = "$ch_bright_sh 5%-", no-startup-id = true }
