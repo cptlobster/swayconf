@@ -50,7 +50,7 @@ pub enum Commands {
     Kill,
     #[subenum(Config, Runtime)]
     Set{name: String, value: String},
-    #[subenum(Config, Runtime)]
+    #[subenum(Runtime)]
     Workspace{number: i8, name: Option<String>},
     #[subenum(Config, Runtime)]
     Else(String),

@@ -6,6 +6,11 @@ Graphical interface for generating / editing i3/Sway configuration files.
 cargo build
 ```
 
+## Testing
+```shell
+cargo test
+```
+
 ## Running
 ```shell
 cargo run
