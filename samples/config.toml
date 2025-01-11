@@ -1,0 +1,135 @@
+# This is an example config file based off of my Sway config
+version = "0.1"
+
+# Startup applications (these will be called with exec)
+# To add commands to be executed on config reloads too, create an exec_always entry)
+exec = [
+    { command = "dex --autostart --environment sway", no-startup-id = true },
+    { command = "swayidle -w timeout 300 $lock_sh before-sleep $lock_sh" },
+    { command = "nm-applet --sm-disable", no-startup-id = true },
+    { command = "blueman-applet", no-startup-id = true },
+    { command = "mako", no-startup-id = true },
+    { command = "swaybg -i $bg_file -m fill", no-startup-id = true }
+]
+
+tiling_drag = true
+floating_modifier = "$mod"
+
+# input device configuration
+input."type:tablet_tool".events = false
+input."type:touch".events = false
+
+[input."type:touchpad"]
+natural_scroll = true
+tap = true
+
+# set system font
+[font]
+pango = "Fira Code"
+size = 12
+
+# for_window rules
+[[for_window]]
+rule = { class = "(?i)gscreenshot" }
+floating = "enable"
+
+[[for_window]]
+rule = { window_role = "Toplevel" }
+floating = "enable"
+
+[set]
+# set the default mod key (Mod4 = Win, Mod1 = Alt)
+mod = "Mod4"
+# Config directory location
+cfg_dir = "$HOME/.config/sway"
+# Helper scripts
+lock_sh = "$cfg_dir/scripts/lock.sh"
+ch_vol_sh = "$cfg_dir/scripts/change_volume.sh"
+ch_bright_sh = "$cfg_dir/scripts/change_brightness.sh"
+mute_sh = "$cfg_dir/scripts/change_brightness.sh"
+# Background
+bg_file = "$HOME/Pictures/mountains.png"
+# Refresh status command
+refresh_i3status = "pkill -RTMIN+10 i3blocks"
+
+[bindsym]
+# Shortcuts (this will not work unless support for rofi-i3-shortcut-help is added)
+"$mod+Shift+slash".exec.command = "rofi -modi shortcut:~/.rofi-i3-shortcuts/shortcut.sh -show shortcut"
+# kill currently focused window
+"$mod+Shift+Q".kill = true
+# launch applications
+"$mod+Return".exec.command = "alacritty"
+"$mod+Shift+space".exec.command = "rofi -combi-modi window,drun,ssh -show combi"
+"Mod4+Control+Mod1+Shift+l".exec.command = "xdg-open https://www.linkedin.com"
+# Screenshots
+"$mod+Control+s".exec.command = "gscreenshot"
+"$mod+Shift+s".exec.command = "gscreenshot -s -c -n"
+"$mod+Mod1+s".exec.command = "gscreenshot -c -n"
+# focus windows
+"$mod+Up".focus.directional = "up"
+"$mod+Down".focus.directional = "down"
+"$mod+Left".focus.directional = "left"
+"$mod+Right".focus.directional = "right"
+"$mod+a".focus.hierarchy = "parent"
+"$mod+d".focus.hierarchy = "child"
+# move windows
+"$mod+Shift+Up".move.directional = "up"
+"$mod+Shift+Down".move.directional = "down"
+"$mod+Shift+Left".move.directional = "left"
+"$mod+Shift+Right".move.directional = "right"
+# container split
+"$mod+h".split = "horizontal"
+"$mod+v".split = "vertical"
+"$mod+f".fullscreen = "toggle"
+# change container layouts
+"$mod+s".layout.set = "stacking"
+"$mod+w".layout.set = "tabbed"
+"$mod+e".layout.toggle = "split"
+# toggle tiling/floating
+"$mod+Shift+Space".floating = "toggle"
+"$mod+r".mode = "resize"
+# workspaces
+"$mod+1".workspace = 1
+"$mod+2".workspace = 2
+"$mod+3".workspace = 3
+"$mod+4".workspace = 4
+"$mod+5".workspace = 5
+"$mod+6".workspace = 6
+"$mod+7".workspace = 7
+"$mod+8".workspace = 8
+"$mod+9".workspace = 9
+"$mod+0".workspace = 10
+# move containers to workspaces
+"$mod+Shift+1".move.workspace = 1
+"$mod+Shift+2".move.workspace = 2
+"$mod+Shift+3".move.workspace = 3
+"$mod+Shift+4".move.workspace = 4
+"$mod+Shift+5".move.workspace = 5
+"$mod+Shift+6".move.workspace = 6
+"$mod+Shift+7".move.workspace = 7
+"$mod+Shift+8".move.workspace = 8
+"$mod+Shift+9".move.workspace = 9
+"$mod+Shift+0".move.workspace = 10
+# media controls
+"XF86AudioRaiseVolume".exec = { command = "$ch_vol_sh +5% && $refresh_i3status", no-startup-id = true }
+"XF86AudioLowerVolume".exec = { command = "$ch_vol_sh -5% && $refresh_i3status", no-startup-id = true }
+"XF86AudioMute".exec = { command = "$mute_sh && $refresh_i3status", no-startup-id = true }
+"XF86AudioMicMute".exec = { command = "pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status", no-startup-id = true }
+"XF86AudioPlay".exec = { command = "playerctl play-pause", no-startup-id = true }
+"XF86AudioPause".exec = { command = "playerctl play-pause", no-startup-id = true }
+"XF86AudioNext".exec = { command = "playerctl next", no-startup-id = true }
+"XF86AudioPrev".exec = { command = "playerctl previous", no-startup-id = true }
+# config
+"$mod+Shift+c".reload = true
+"$mod+Shift+r".restart = true
+# power options
+"$mod+l".exec = { command = "$lock_sh", no-startup-id = true }
+"$mod+Shift+e".exec.command = "rofi -show p -modi p:rofi-power-menu"
+
+[bindcode]
+"233".exec = { command = "$ch_bright_sh +5%", no-startup-id = true }
+"232".exec = { command = "$ch_bright_sh 5%-", no-startup-id = true }
+
+# swaybar management
+[bar]
+status_command = "i3blocks"
