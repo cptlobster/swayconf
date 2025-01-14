@@ -4,7 +4,6 @@ use toml::{Table, Value};
 use crate::sway::config::ConfigFile;
 use crate::sway::commands::{Config, Runtime, SubLayout};
 use crate::sway::options;
-use crate::sway::options::Hierarchy::Parent;
 
 fn read(filepath: PathBuf) -> Table {
     read_to_string(filepath).unwrap().parse().unwrap()
