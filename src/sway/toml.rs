@@ -161,7 +161,14 @@ fn parse_floating(value: &Value) -> Result<Runtime, String> {
     }
 }
 
-fn parse_focus(table: &Table) -> Result<Runtime, String> {
+fn parse_focus(value: &Value) -> Result<Runtime, String> {
+    match value.as_table() {
+        Some(t) => parse_focus_table(t),
+        None => Err("Syntax error: focus parameter must be a table".to_string()),
+    }
+}
+
+fn parse_focus_table(table: &Table) -> Result<Runtime, String> {
     let valid_cmds = table.keys().filter_map(|k| {
         match k.clone().as_str() {
             "directional" => {
@@ -225,7 +232,14 @@ fn parse_focus(table: &Table) -> Result<Runtime, String> {
     }
 }
 
-fn parse_move(table: &Table) -> Result<Runtime, String> {
+fn parse_move(value: &Value) -> Result<Runtime, String> {
+    match value.as_table() {
+        Some(t) => parse_move_table(t),
+        None => Err("Syntax error: move parameter must be a table".to_string()),
+    }
+}
+
+fn parse_move_table(table: &Table) -> Result<Runtime, String> {
     let valid_cmds = table.keys().filter_map(|k| {
         match k.clone().as_str() {
             "directional" => {
@@ -244,8 +258,55 @@ fn parse_move(table: &Table) -> Result<Runtime, String> {
     }
 }
 
-fn parse_resize(table: &Table) -> Result<Runtime, String> {
-    Err("Not Implemented".to_string())
+
+fn parse_resize(value: &Value) -> Result<Runtime, String> {
+    match value.as_table() {
+        Some(t) => parse_resize_table(t),
+        None => Err("Syntax error: resize parameter must be a table".to_string()),
+    }
+}
+fn parse_resize_table(table: &Table) -> Result<Runtime, String> {
+    let change_str = table.get("change").unwrap().as_str().unwrap();
+    let change = match change_str {
+        "grow" => options::Size::Grow,
+        "shrink" => options::Size::Shrink,
+        _ => return Err("Syntax error: resize parameter must be a table".to_string()),
+    }
+    let x: Option<u8> = match table.get("width") {
+        Some(xv) => match xv.try_into() {
+            Some(xvv) => Some(xvv),
+            None => return Err("Syntax error: width parameter must be an integer".to_string()),
+        },
+        None => None
+    };
+    let y: Option<u8> = match table.get("height") {
+        Some(yv) => match yv.try_into() {
+            Some(yvv) => Some(yvv),
+            None => return Err("Syntax error: height parameter must be an integer".to_string()),
+        },
+        None => None
+    };
+    let px = match table.get("px") {
+        Some(v) => match v.try_into() {
+            Some(vv) => vv,
+            None => return Err("Syntax error: px parameter must be boolean".to_string()),
+        }
+        None => false
+    };
+    let pt = match table.get("ppt") {
+        Some(v) => match v.try_into() {
+            Some(vv) => vv,
+            None => return Err("Syntax error: pt parameter must be boolean".to_string()),
+        }
+        None => !px
+    };
+    if px == pt { return Err("Syntax error: px and pt must not be equal".to_string()); }
+    let unit = if px { options::Units::Px } else { options::Units::Ppt };
+    match (x, y) {
+        (Some(_), Some(_)) => Err("Syntax error: x and y must not be equal".to_string()),
+        (None, None) => Err("Syntax error: x and y must not be equal".to_string()),
+        (x, y) => Ok(Runtime::Resize{change, x, y, unit}),
+    }
 }
 
 fn parse_workspace(value: &Value) -> Result<Runtime, String> {

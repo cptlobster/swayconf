@@ -37,7 +37,7 @@ pub enum Commands {
     #[subenum(Runtime)]
     Reload,
     #[subenum(Runtime)]
-    Resize{change: options::Size, x: Option<i8>, y: Option<i8>, x_unit: options::Units, y_unit: options::Units},
+    Resize{ change: options::Size, x: Option<u8>, y: Option<u8>, unit: options::Units },
     #[subenum(Runtime)]
     Split(options::Split),
     #[subenum(Config, Runtime)]
@@ -122,11 +122,11 @@ impl Display for Commands {
             Commands::Layout(layout) => { write!(f, "layout {}", layout) }
             Commands::Move(movement) => { write!(f, "move {}", movement) }
             Commands::Reload => { write!(f, "reload") }
-            Commands::Resize{change, x, y, x_unit, y_unit} => {
+            Commands::Resize{change, x, y, unit} => {
                 if x.is_some() && y.is_none() {
-                    write!(f, "resize {} width {} {}", change, x.unwrap(), x_unit)
+                    write!(f, "resize {} width {} {}", change, x.unwrap(), unit)
                 } else if y.is_some() && x.is_none() {
-                    write!(f, "resize {} height {} {}", change, y.unwrap(), y_unit)
+                    write!(f, "resize {} height {} {}", change, y.unwrap(), unit)
                 } else {
                     panic!("Only one of x or y must be specified")
                 }
