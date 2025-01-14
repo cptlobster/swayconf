@@ -23,7 +23,7 @@ use std::path::PathBuf;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Commands {
     #[subenum(Config)]
-    Bar{bar_id: String, subcommands: String},
+    Bar{ bar_id: String, subcommands: String },
     #[subenum(Runtime)]
     Exit,
     #[subenum(Runtime)]
@@ -37,11 +37,11 @@ pub enum Commands {
     #[subenum(Runtime)]
     Reload,
     #[subenum(Runtime)]
-    Resize{change: options::Size, x: Option<i8>, y: Option<i8>, x_unit: options::Units, y_unit: options::Units},
+    Resize{ change: options::Size, x: Option<i8>, y: Option<i8>, x_unit: options::Units, y_unit: options::Units },
     #[subenum(Runtime)]
     Split(options::Split),
     #[subenum(Config, Runtime)]
-    Bindsym{flags: Vec<options::Bindsym>, keys: Vec<String>, command: Box<Runtime>},
+    Bindsym{ flags: Vec<options::Bindsym>, keys: Vec<String>, command: Box<Runtime> },
     #[subenum(Config, Runtime)]
     Exec(String),
     #[subenum(Config, Runtime)]
@@ -51,11 +51,13 @@ pub enum Commands {
     #[subenum(Config, Runtime)]
     Set{name: String, value: String},
     #[subenum(Runtime)]
-    Workspace{number: i8, name: Option<String>},
+    Workspace{ number: i8, name: Option<String> },
     #[subenum(Config, Runtime)]
     Else(String),
     #[subenum(Config)]
     Comment(String),
+    #[subenum(Config)]
+    Blank,
     #[subenum(Config)]
     Include(PathBuf),
 }
@@ -110,9 +112,10 @@ impl Display for Commands {
                     }
                 }
             }
-            Commands::Comment(content) => { write!(f, "# {}", content)}
-            Commands::Else(command) => { write!(f, "{}", command)}
-            Commands::Exec(command) => { write!(f, "exec {}", command)}
+            Commands::Blank => { write!(f, "") },
+            Commands::Comment(content) => { write!(f, "# {}", content) }
+            Commands::Else(command) => { write!(f, "{}", command) }
+            Commands::Exec(command) => { write!(f, "exec {}", command) }
             Commands::ExecAlways(command) => { write!(f, "exec_always {}", command) }
             Commands::Exit => { write!(f, "exit") }
             Commands::Focus(focus) => { write!(f, "focus {}", focus) }
@@ -131,7 +134,7 @@ impl Display for Commands {
                     panic!("Only one of x or y must be specified")
                 }
             }
-            Commands::Set{name, value} => { write!(f, "set ${} {}", name, value)}
+            Commands::Set{name, value} => { write!(f, "set ${} {}", name, value) }
             Commands::Split(split) => { write!(f, "split {}", split) }
             Commands::Workspace{number, name} => {
                 match name {
