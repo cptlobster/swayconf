@@ -63,10 +63,10 @@ pub enum Commands {
 /// Subcommands for focus.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SubFocus {
-    Direction(options::Directional),
+    Directional(options::Directional),
     Sibling(options::FocusSibling),
     Hierarchy(options::Hierarchy),
-    OutputDirection(options::Directional),
+    OutputDirectional(options::Directional),
     OutputNamed(String),
 }
 
@@ -159,10 +159,10 @@ impl Display for Config {
 impl Display for SubFocus {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self {
-            SubFocus::Direction(dir) => { write!(f, "{}", dir) }
+            SubFocus::Directional(dir) => { write!(f, "{}", dir) }
             SubFocus::Hierarchy(dir) => { write!(f, "{}", dir) }
             SubFocus::Sibling(dir) => { write!(f, "{} sibling", dir) }
-            SubFocus::OutputDirection(dir) => { write!(f, "output {}", dir) }
+            SubFocus::OutputDirectional(dir) => { write!(f, "output {}", dir) }
             SubFocus::OutputNamed(name) => { write!(f, "output {}", name) }
         }
     }

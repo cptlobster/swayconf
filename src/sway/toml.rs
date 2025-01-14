@@ -2,7 +2,7 @@ use std::fs::read_to_string;
 use std::path::PathBuf;
 use toml::{Table, Value};
 use crate::sway::config::ConfigFile;
-use crate::sway::commands::{Config, Runtime, SubLayout};
+use crate::sway::commands::{Config, Runtime, SubFocus, SubLayout, SubMove};
 use crate::sway::options;
 
 fn read(filepath: PathBuf) -> Table {
@@ -162,11 +162,86 @@ fn parse_floating(value: &Value) -> Result<Runtime, String> {
 }
 
 fn parse_focus(table: &Table) -> Result<Runtime, String> {
-    Err("Not Implemented".to_string())
+    let valid_cmds = table.keys().filter_map(|k| {
+        match k.clone().as_str() {
+            "directional" => {
+                let dir_str = table.get("directional").unwrap();
+                match parse_directional(dir_str) {
+                    Ok(direction) => Some(Ok(Runtime::Focus(SubFocus::Directional(direction)))),
+                    Err(e) => Some(Err(e)),
+                }
+            },
+            "sibling" => {
+                let dir_str = table.get("sibling").unwrap();
+                match parse_focus_sibling(dir_str) {
+                    Ok(direction) => Some(Ok(Runtime::Focus(SubFocus::Sibling(direction)))),
+                    Err(e) => Some(Err(e)),
+                }
+            }
+            "hierarchy" => {
+                let dir_str = table.get("hierarchy").unwrap();
+                match parse_hierarchy(dir_str) {
+                    Ok(direction) => Some(Ok(Runtime::Focus(SubFocus::Hierarchy(direction)))),
+                    Err(e) => Some(Err(e)),
+                }
+            }
+            "output" => {
+                let dir_table = table.get("directional").unwrap().as_table();
+                if dir_table == None {
+                    Some(Err("Syntax error: output parameter must be a table".to_string()))
+                }
+                else {
+                    let valid_cmds = dir_table.keys().filter_map(|dk| {
+                        match dk.clone().as_str() {
+                            "directional" => {
+                                let dir_str = dir_table.get("directional").unwrap();
+                                match parse_directional(dir_str) {
+                                    Ok(direction) => Some(Ok(Runtime::Focus(SubFocus::OutputDirectional(direction)))),
+                                    Err(e) => Some(Err(e)),
+                                }
+                            }
+                            "named" => {
+                                let name_str = dir_table.get("directional").unwrap();
+                                match name_str.as_str() {
+                                    Some(ns) => Some(Ok(Runtime::Focus(SubFocus::OutputNamed(ns)))),
+                                    None => Some(Err("Syntax error: output name must be a string".to_string()))
+                                }
+                            }
+                            _ => return None
+                        }
+                    });
+                    match valid_cmds.len() {
+                        1 => valid_cmds[0].clone(),
+                        _ => Err("Syntax error: One and only one move subcommand must be declared".to_string()),
+                    }
+                }
+            },
+            _ => None
+        }
+    }).collect();
+    match valid_cmds.len() {
+        1 => valid_cmds[0].clone(),
+        _ => Err("Syntax error: One and only one move subcommand must be declared".to_string()),
+    }
 }
 
 fn parse_move(table: &Table) -> Result<Runtime, String> {
-    Err("Not Implemented".to_string())
+    let valid_cmds = table.keys().filter_map(|k| {
+        match k.clone().as_str() {
+            "directional" => {
+                let dir_str = table.get("directional").unwrap();
+                match parse_directional(dir_str) {
+                    Ok(direction) => Some(Runtime::Move(SubMove::Directional{ direction, px: None })),
+                    Err(_) => None,
+                }
+            },
+            _ => None
+        }
+    }).collect();
+    match valid_cmds.len() {
+        1 => valid_cmds[0].clone(),
+        _ => Err("Syntax error: One and only one move subcommand must be declared".to_string()),
+    }
 }
 
 fn parse_resize(table: &Table) -> Result<Runtime, String> {
