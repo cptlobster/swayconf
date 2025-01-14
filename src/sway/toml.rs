@@ -2,8 +2,9 @@ use std::fs::read_to_string;
 use std::path::PathBuf;
 use toml::{Table, Value};
 use crate::sway::config::ConfigFile;
-use crate::sway::commands::{Config, Runtime};
+use crate::sway::commands::{Config, Runtime, SubLayout};
 use crate::sway::options;
+use crate::sway::options::Hierarchy::Parent;
 
 fn read(filepath: PathBuf) -> Table {
     read_to_string(filepath).unwrap().parse().unwrap()
@@ -157,7 +158,7 @@ fn parse_floating(value: &Value) -> Result<Runtime, String> {
     };
     match v {
         Some(v) => Ok(Runtime::Floating(v)),
-        None => Err("Syntax error: floating parameter must match togglable boolean".to_string()),
+        None => Err("Syntax error: floating parameter must be togglable boolean (true, false, or toggle)".to_string()),
     }
 }
 
@@ -189,8 +190,14 @@ fn parse_workspace(value: &Value) -> Result<Runtime, String> {
     }
 }
 
-fn parse_split(table: &Table) -> Result<Runtime, String> {
-    Err("Not Implemented".to_string())
+fn parse_split(value: &Value) -> Result<Runtime, String> {
+    match value.as_str() {
+        Some("horizontal") => Ok(Runtime::Split(options::Split::Horizontal)),
+        Some("vertical") => Ok(Runtime::Split(options::Split::Vertical)),
+        Some("none") => Ok(Runtime::Split(options::Split::None)),
+        Some(_) => Err("Syntax error: Split must be one of (horizontal, vertical, none)".to_string()),
+        None => Err("Syntax error: must be a string".to_string()),
+    }
 }
 
 fn parse_directional(value: &Value) -> Result<options::Directional, String> {
@@ -223,7 +230,69 @@ fn parse_hierarchy(value: &Value) -> Result<options::Hierarchy, String> {
 }
 
 fn parse_layout(table: &Table) -> Result<Runtime, String> {
-    Err("Not Implemented".to_string())
+    let valid_cmds = table.keys().filter_map(|k| {
+        match k.clone().as_str() {
+            "set" => Some(parse_layout_set(table.get("set").unwrap())),
+            "cycle" => Some(parse_layout_cycle(table.get("layout").unwrap())),
+            _ => None
+        }
+    }).collect();
+    match valid_cmds.len() {
+        1 => valid_cmds[0].clone(),
+        _ => Err("Syntax error: One and only one layout subcommand must be declared".to_string()),
+    }
+}
+
+fn parse_layout_set(value: &Value) -> Result<Runtime, String> {
+    let layout = match value.as_str() {
+        Some("default") => Ok(options::Layout::Default),
+        Some("stacking") => Ok(options::Layout::Stacking),
+        Some("tabbed") => Ok(options::Layout::Tabbed),
+        Some("splith") => Ok(options::Layout::SplitH),
+        Some("split-h") => Ok(options::Layout::SplitH),
+        Some("splitv") => Ok(options::Layout::SplitV),
+        Some("split-v") => Ok(options::Layout::SplitV),
+        Some(_) => Err("Syntax error: must be one of (default, stacking, tabbed, splith, splitv)".to_string()),
+        None => Err("Syntax error: must be a string".to_string()),
+    };
+    match layout {
+        Ok(l) => Ok(Runtime::Layout(SubLayout::Set(l))),
+        Err(e) => Err(e)
+    }
+}
+fn parse_layout_cycle(value: &Value) -> Result<Runtime, String> {
+    fn parse_cycle_single_arg(arg: String) -> Option<options::LayoutCycleSingle> {
+        match arg.as_str() {
+            "split" => Some(options::LayoutCycleSingle::Split),
+            "all" => Some(options::LayoutCycleSingle::All),
+            _ => None
+        }
+    }
+    fn parse_cycle_multi_arg(arg: String) -> Option<options::LayoutCycleMulti> {
+        match arg.as_str() {
+            "stacking" => Some(options::LayoutCycleMulti::Stacking),
+            "tabbed" => Some(options::LayoutCycleMulti::Tabbed),
+            "splith" => Some(options::LayoutCycleMulti::SplitH),
+            "split-h" => Some(options::LayoutCycleMulti::SplitH),
+            "splitv" => Some(options::LayoutCycleMulti::SplitV),
+            "split-v" => Some(options::LayoutCycleMulti::SplitV),
+            _ => None
+        }
+    }
+    match value.as_str() {
+        Some(a) => match parse_cycle_single_arg(a.to_string()) {
+            Some(s) => Ok(Runtime::Layout(SubLayout::Cycle(s))),
+            None => Err("Syntax error: must be one of (all, split)".to_string()),
+        }
+        None => match value.as_array() {
+            Some(arr) => {
+                let args = arr.iter().filter_map(parse_cycle_multi_arg).collect::<Vec<options::LayoutCycleMulti>>();
+                if args.len() == 0 { Err("Syntax error: must have at least one valid argument".to_string()) }
+                else { Ok(Runtime::Layout(SubLayout::Cycle(args))) }
+            }
+            None => Err("Syntax error: must be a string or array".to_string()),
+        }
+    }
 }
 
 fn parse_layout_opt(value: &Value) -> Result<options::Layout, String> {
