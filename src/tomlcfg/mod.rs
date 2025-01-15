@@ -13,8 +13,8 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-mod core;
-mod runtime;
+pub mod base;
+pub mod runtime;
 
 use thiserror::Error;
 
@@ -29,6 +29,8 @@ enum ParseError {
     MultiKey(Vec<String>),
     #[error("TOML parse error: {0}")]
     TomlError(#[from] toml::de::Error),
+    #[error("Not implemented")]
+    NotImplemented,
 }
 
 /// type alias for parser results. Supports any type for `Ok()` and `ParseError` enum for `Err()`.

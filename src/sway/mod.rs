@@ -13,6 +13,6 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-mod commands;
-mod options;
-mod config;
+pub mod commands;
+pub mod options;
+pub mod config;

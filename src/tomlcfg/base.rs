@@ -19,6 +19,7 @@ use std::path::{PathBuf};
 use crate::tomlcfg::{ParseError, ParseResult};
 use toml::{Table, Value};
 
+#[macro_export]
 macro_rules! as_type {
     ($input:expr, $target:path) => {
         match $input {
@@ -28,48 +29,55 @@ macro_rules! as_type {
     };
 }
 
-fn read(filepath: PathBuf) -> ParseResult<Table> {
+#[macro_export]
+macro_rules! one_of {
+    ($input:expr, $($key:literal, $target:ident), *) => {{
+        let expected_keys = vec![$($key),*];
+        let found_keys: Vec<String> = $input.keys().cloned().filter(|k| expected_keys.contains(&k.as_str())).collect();
+        match &found_keys.len() {
+            1 => match found_keys[0].as_str() {
+                $($key => $target(find($input, $key.to_string())?),)*
+                _ => Err(ParseError::MultiKey(vec![])),
+            }
+            _ => Err(ParseError::MultiKey(found_keys)),
+        }
+    }}
+}
+
+pub fn read(filepath: PathBuf) -> ParseResult<Table> {
     match read_to_string(filepath).unwrap().parse() {
         Ok(parsed) => Ok(parsed),
         Err(error) => Err(ParseError::TomlError(error))
     }
 }
 
-fn from_str(str: String) -> ParseResult<Table> {
+pub fn from_str(str: String) -> ParseResult<Table> {
     match str.parse() {
         Ok(parsed) => Ok(parsed),
         Err(error) => Err(ParseError::TomlError(error))
     }
 }
 
-fn find(table: &Table, key: String) -> ParseResult<&Value> {
+pub fn find(table: &Table, key: String) -> ParseResult<&Value> {
     match table.get(&key) {
         Some(value) => Ok(value),
         None => Err(ParseError::KeyNotFound(key)),
     }
 }
-fn table(input: &Table, key: String) -> ParseResult<&Table> {
+pub fn table(input: &Table, key: String) -> ParseResult<&Table> {
     find(input, key).and_then(|table| as_type!(table, Value::Table))
-}
-
-fn one_of(table: &Table, keys: Vec<String>) -> ParseResult<(String, &Value)> {
-    let found_keys: Vec<String> = table.keys().cloned().filter(|k| keys.contains(k)).collect();
-    match &found_keys.len() {
-        1 => Ok((found_keys[0].clone(), table.get(&found_keys[0]).unwrap())),
-        _ => Err(ParseError::MultiKey(found_keys)),
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_find() {
         let source = "a = 1\nb = \"two\"\nc = [true, false]\n[d]\none = 4".to_string();
-        
+
         let base = from_str(source);
-        
+
         match base {
             Ok(t) => {
                 let res_a = find(&t, "a".to_string());
