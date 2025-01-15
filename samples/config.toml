@@ -12,15 +12,15 @@ exec = [
     { command = "swaybg -i $bg_file -m fill", no-startup-id = true }
 ]
 
-tiling_drag = true
-floating_modifier = "$mod"
+tiling-drag = true
+floating-modifier = "$mod"
 
 # input device configuration
 input."type:tablet_tool".events = false
 input."type:touch".events = false
 
 [input."type:touchpad"]
-natural_scroll = true
+natural-scroll = true
 tap = true
 
 # set system font
@@ -29,12 +29,12 @@ pango = "Fira Code"
 size = 12
 
 # for_window rules
-[[for_window]]
+[[for-window]]
 rule = { class = "(?i)gscreenshot" }
 floating = "enable"
 
-[[for_window]]
-rule = { window_role = "Toplevel" }
+[[for-window]]
+rule = { window-role = "Toplevel" }
 floating = "enable"
 
 [set]
@@ -143,4 +143,4 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 
 # swaybar management
 [bar]
-status_command = "i3blocks"
+status-command = "i3blocks"

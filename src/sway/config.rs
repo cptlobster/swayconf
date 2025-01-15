@@ -36,12 +36,12 @@ pub struct ConfigFile {
 
 impl ConfigFile {
     /// Create a new config file
-    fn new(path: PathBuf, commands: Vec<Config>) -> ConfigFile {
+    pub fn new(path: PathBuf, commands: Vec<Config>) -> ConfigFile {
         ConfigFile{ path, commands }
     }
 
     /// Create a new config file at the default location (`~/.config/sway/config`)
-    fn default(commands: Vec<Config>) -> ConfigFile {
+    pub fn default(commands: Vec<Config>) -> ConfigFile {
         let default_loc: PathBuf = my_home().unwrap().unwrap().join(".config/sway/config");
         ConfigFile::new(default_loc, commands)
     }
