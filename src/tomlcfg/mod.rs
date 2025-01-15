@@ -14,3 +14,19 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 mod core;
+
+use thiserror::Error;
+
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+enum ParseError {
+    #[error("Key not found: {0}")]
+    KeyNotFound(String),
+    #[error("Incorrect type: Must be one of the following: ({})", .0.join(", "))]
+    IncorrectType(Vec<String>),
+    #[error("One and only one key must be provided: found ({})", .0.join(", "))]
+    MultiKey(Vec<String>),
+    #[error("TOML parse error: {0}")]
+    TomlError(#[from] toml::de::Error),
+}
+
+type ParseResult<T> = Result<T, ParseError>;
