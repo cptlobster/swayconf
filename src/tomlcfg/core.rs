@@ -15,76 +15,73 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fs::read_to_string;
-use std::path::PathBuf;
+use std::path::{PathBuf};
 use crate::tomlcfg::{ParseError, ParseResult};
 use toml::{Table, Value};
 
-fn read(filepath: PathBuf) -> Table {
-    read_to_string(filepath).unwrap().parse().unwrap()
+macro_rules! as_type {
+    ($input:expr, $target:path) => {
+        match $input {
+            $target(v) => Ok(v),
+            _ => Err(ParseError::IncorrectType(vec![stringify!($target).to_string()])),
+        }
+    };
 }
 
-fn find(input: ParseResult<&Table>, key: String) -> ParseResult<&Value> {
-    match input {
-        Ok(table) => match table.get(&key) {
-            Some(value) => Ok(value),
-            None => Err(ParseError::KeyNotFound(key)),
-        }
-        Err(e) => Err(e),
+fn read(filepath: PathBuf) -> ParseResult<Table> {
+    match read_to_string(filepath).unwrap().parse() {
+        Ok(parsed) => Ok(parsed),
+        Err(error) => Err(ParseError::TomlError(error))
     }
 }
 
-fn as_table(input: ParseResult<&Value>) -> ParseResult<&Table> {
-    match input {
-        Ok(table) => match table.as_table() {
-            Some(value) => Ok(value),
-            None => Err(ParseError::IncorrectType(vec!["table".to_string()])),
-        }
-        Err(e) => Err(e),
+fn from_str(str: String) -> ParseResult<Table> {
+    match str.parse() {
+        Ok(parsed) => Ok(parsed),
+        Err(error) => Err(ParseError::TomlError(error))
     }
 }
 
-fn as_str(input: ParseResult<&Value>) -> ParseResult<String> {
-    match input {
-        Ok(table) => match table.as_str() {
-            Some(value) => Ok(value.to_string()),
-            None => Err(ParseError::IncorrectType(vec!["string".to_string()])),
-        }
-        Err(e) => Err(e),
+fn find(table: &Table, key: String) -> ParseResult<&Value> {
+    match table.get(&key) {
+        Some(value) => Ok(value),
+        None => Err(ParseError::KeyNotFound(key)),
+    }
+}
+fn table(input: &Table, key: String) -> ParseResult<&Table> {
+    find(input, key).and_then(|table| as_type!(table, Value::Table))
+}
+
+fn one_of(table: &Table, keys: Vec<String>) -> ParseResult<(String, &Value)> {
+    let found_keys: Vec<String> = table.keys().cloned().filter(|k| keys.contains(k)).collect();
+    match &found_keys.len() {
+        1 => Ok((found_keys[0].clone(), table.get(&found_keys[0]).unwrap())),
+        _ => Err(ParseError::MultiKey(found_keys)),
     }
 }
 
-fn as_u8(input: ParseResult<&Value>) -> ParseResult<u8> {
-    match input {
-        Ok(table) => match table.as_integer() {
-            Some(value) => match u8::try_from(value) {
-                Ok(value) => Ok(value),
-                Err(_) => Err(ParseError::IncorrectType(vec!["u8".to_string()])),
-            },
-            None => Err(ParseError::IncorrectType(vec!["u8".to_string()])),
-        }
-        Err(e) => Err(e),
-    }
-}
-
-fn as_bool(input: ParseResult<&Value>) -> ParseResult<bool> {
-    match input {
-        Ok(table) => match table.as_bool() {
-            Some(value) => Ok(value),
-            None => Err(ParseError::IncorrectType(vec!["boolean".to_string()])),
-        }
-        Err(e) => Err(e),
-    }
-}
-
-fn one_of(input: ParseResult<&Table>, keys: Vec<String>) -> ParseResult<(String, &Value)> {
-    match input {
-        Ok(table) => {
-            let found_keys: Vec<String> = table.keys().cloned().filter(|k| keys.contains(k)).collect();
-            match &found_keys.len() {
-                1 => Ok((found_keys[0].clone(), table.get(&found_keys[0]).unwrap())),
-                _ => Err(ParseError::MultiKey(found_keys)),
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_find() {
+        let source = "a = 1\nb = \"two\"\nc = [true, false]\n[d]\none = 4".to_string();
+        
+        let base = from_str(source);
+        
+        match base {
+            Ok(t) => {
+                let res_a = find(&t, "a".to_string());
+                let res_b = find(&t, "b".to_string());
+                let res_e = find(&t, "e".to_string());
+                assert!(res_a.is_ok());
+                assert!(res_b.is_ok());
+                assert!(res_e.is_err());
+            }
+            Err(e) => {
+                panic!("{}", e);
             }
         }
-        Err(e) => Err(e),
     }
 }
