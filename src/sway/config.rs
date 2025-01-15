@@ -56,13 +56,13 @@ impl ConfigFile {
 }
 
 impl WritableConfig for ConfigFile {
-    fn write(self) -> Result<usize> {
+    fn write(&self) -> Result<usize> {
         File::open(self.path.clone())
             .and_then(|mut f| {f.write(self.to_string().as_bytes())})
     }
 
     fn strip_comments(&self) -> ConfigFile {
-        let filtered = self.commands.iter().filter(|c| discriminant(c) != discriminant(&&Config::Comment(String::new()))).collect();
+        let filtered = self.commands.iter().cloned().filter(|c| discriminant(c) != discriminant(&&Config::Comment(String::new()))).collect();
         ConfigFile::new(self.path.clone(), filtered)
     }
 }
@@ -101,9 +101,9 @@ impl ConfigGroup {
 }
 
 impl WritableConfig for ConfigGroup {
-    fn write(self) -> Result<usize> {
+    fn write(&self) -> Result<usize> {
         let mut result: Result<usize> = Ok(0);
-        for file in self.files {
+        for file in self.files.clone() {
             match file.write() {
                 Err(err) => { result = Err(err); break; }
                 Ok(s) => result = Ok(result? + s),
@@ -146,27 +146,5 @@ mod tests {
 
         let file = ConfigFile::default(commands);
         assert_eq!(expected, file.to_string());
-    }
-
-    fn test_config_to_string() {
-        let commands: Vec<Config> = vec![
-            Config::ExecAlways("/bin/echo \"this is a command!\"".to_string()),
-            Config::Bindsym{flags: vec![], keys: vec!["Mod4".to_string(), "Space".to_string()], command: Box::new(Runtime::Exec("/bin/bash".to_string()))},
-            Config::Comment("move the currently focused window around".to_string()),
-            Config::Bindsym{flags: vec![], keys: vec!["Mod4".to_string(), "W".to_string()], command: Box::new(Runtime::Move(SubMove::Directional{direction: Directional::Up, px: None}))},
-            Config::Bindsym{flags: vec![], keys: vec!["Mod4".to_string(), "S".to_string()], command: Box::new(Runtime::Move(SubMove::Directional{direction: Directional::Down, px: None}))},
-            Config::Bindsym{flags: vec![], keys: vec!["Mod4".to_string(), "A".to_string()], command: Box::new(Runtime::Move(SubMove::Directional{direction: Directional::Left, px: None}))},
-            Config::Bindsym{flags: vec![], keys: vec!["Mod4".to_string(), "D".to_string()], command: Box::new(Runtime::Move(SubMove::Directional{direction: Directional::Right, px: None}))},
-        ];
-
-        let expected: String = "exec_always /bin/echo \"this is a command!\"\n\
-        bindsym Mod4+Space exec /bin/bash\n\
-        bindsym Mod4+W move up\n\
-        bindsym Mod4+S move down\n\
-        bindsym Mod4+A move left\n\
-        bindsym Mod4+D move right".to_string();
-
-        let file = ConfigFile::default(commands);
-        assert_eq!(expected, file.strip_comments().to_string());
     }
 }

@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use toml::{Table, Value};
 use crate::sway::config::ConfigFile;
 use crate::sway::commands::{Config, Runtime, SubFocus, SubLayout, SubMove};
-use crate::sway::commands::Config::Blank;
 use crate::sway::options;
 use crate::sway::options::RelWorkspace;
 
@@ -12,40 +11,41 @@ fn read(filepath: PathBuf) -> Table {
 }
 
 fn check_command_vecs(commands: Vec<Result<Config, String>>) -> Result<Vec<Config>, String> {
-    let invalid_commands = commands.iter().filter(|c| c.is_err()).collect();
-    if invalid_commands.len() != 0 {
-        invalid_commands.get(0)
-    } else {
-        Ok(commands.iter().cloned().map(|c| c.unwrap()).collect())
-    }
+    for cmd in &commands {
+        match cmd {
+            Err(e) => return Err(e.clone()),
+            _ => continue,
+        };
+    };
+    Ok(commands.iter().cloned().map(|c| c.unwrap()).collect())
 }
 
 fn parse_to_cfg(table: &Table) -> Result<ConfigFile, String> {
     let sets = match table.get("set") {
         Some(v) => match v.try_into() {
-            Some(t) => check_command_vecs(parse_sets(t)),
-            None => Err("Syntax error: toplevel set parameter must be a table".to_string())
+            Ok(t) => check_command_vecs(parse_sets(t)),
+            Err(_) => Err("Syntax error: toplevel set parameter must be a table".to_string())
         }
         None => Ok(vec![])
     };
     let execs = match table.get("exec") {
         Some(v) => match v.try_into() {
-            Some(arr) => check_command_vecs(parse_execs(arr)),
-            None() => Err("Syntax error: toplevel exec parameter must be an array".to_string())
+            Ok(arr) => check_command_vecs(parse_execs(arr)),
+            Err(_) => Err("Syntax error: toplevel exec parameter must be an array".to_string())
         }
         None => Ok(vec!())
     };
     let execs_always = match table.get("exec-always") {
         Some(v) => match v.try_into() {
-            Some(arr) => check_command_vecs(parse_execs_always(arr)),
-            None() => Err("Syntax error: toplevel exec-always parameter must be an array".to_string())
+            Ok(arr) => check_command_vecs(parse_execs_always(arr)),
+            Err(_) => Err("Syntax error: toplevel exec-always parameter must be an array".to_string())
         }
         None => Ok(vec!())
     };
     let bindsyms = match table.get("bindsym") {
         Some(v) => match v.try_into() {
-            Some(arr) => check_command_vecs(parse_bindsyms(arr)),
-            None() => Err("Syntax error: toplevel bindsym parameter must be a table".to_string())
+            Ok(arr) => check_command_vecs(parse_bindsyms(arr)),
+            Err(_) => Err("Syntax error: toplevel bindsym parameter must be a table".to_string())
         }
         None => Ok(vec!())
     };
@@ -480,7 +480,7 @@ fn parse_resize_table(table: &Table) -> Result<Runtime, String> {
         "grow" => options::Size::Grow,
         "shrink" => options::Size::Shrink,
         _ => return Err("Syntax error: resize parameter must be a table".to_string()),
-    }
+    };
     let x: Option<u8> = match table.get("width") {
         Some(xv) => match xv.try_into() {
             Some(xvv) => Some(xvv),
