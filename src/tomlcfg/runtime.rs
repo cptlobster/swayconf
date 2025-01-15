@@ -1,4 +1,4 @@
-/// TOML configuration parsing
+/// Runtime command structure parsing
 //     Copyright (C) 2024  Dustin Thomas <io@cptlobster.dev>
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -13,23 +13,6 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-mod core;
-mod runtime;
 
-use thiserror::Error;
-
-/// Catch-all enum for parser-related errors.
-#[derive(Debug, Clone, PartialEq, Eq, Error)]
-enum ParseError {
-    #[error("Key not found: {0}")]
-    KeyNotFound(String),
-    #[error("Incorrect type: Must be one of the following: ({})", .0.join(", "))]
-    IncorrectType(Vec<String>),
-    #[error("One and only one key must be provided: found ({})", .0.join(", "))]
-    MultiKey(Vec<String>),
-    #[error("TOML parse error: {0}")]
-    TomlError(#[from] toml::de::Error),
-}
-
-/// type alias for parser results. Supports any type for `Ok()` and `ParseError` enum for `Err()`.
-type ParseResult<T> = Result<T, ParseError>;
+use crate::tomlcfg::{ParseResult, ParseError};
+use crate::tomlcfg::core;
