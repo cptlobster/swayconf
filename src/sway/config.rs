@@ -20,10 +20,11 @@ use std::fs::File;
 use std::io::{Write, Result};
 use std::path::PathBuf;
 use homedir::my_home;
-use std::mem::discriminant;
 
 trait WritableConfig {
+    /// Write the config file contents.
     fn write(&self) -> Result<usize>;
+    /// Strip comments and whitespace from the config file.
     fn strip_comments(&self) -> Self;
 }
 
@@ -62,7 +63,13 @@ impl WritableConfig for ConfigFile {
     }
 
     fn strip_comments(&self) -> ConfigFile {
-        let filtered = self.commands.iter().cloned().filter(|c| discriminant(c) != discriminant(&&Config::Comment(String::new()))).collect();
+        let filtered = self.commands.iter().cloned()
+            .filter(|c| match c {
+                Config::Comment(_) => false,
+                Config::Blank => false,
+                _ => true
+            })
+            .collect();
         ConfigFile::new(self.path.clone(), filtered)
     }
 }

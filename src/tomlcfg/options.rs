@@ -15,7 +15,7 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use toml::value::Value;
-use crate::sway::options::{Size, Split, TogglableBool, Units};
+use crate::sway::options::{Directional, FocusSibling, Hierarchy, Size, Split, TogglableBool, Units};
 use crate::tomlcfg::{ParseResult, ParseError};
 use crate::tomlcfg::base::find_opt;
 use crate::{one_of_type, as_type, as_type_opt};
@@ -73,5 +73,31 @@ pub fn parse_splitopt(value: &String) -> ParseResult<Split> {
         "v" | "vertical" => Ok(Split::Vertical),
         "none" => Ok(Split::None),
         e => Err(ParseError::StringMismatch(vec!["horizontal".to_string(), "vertical".to_string(), "none".to_string()], e.to_string())),
+    }
+}
+
+pub fn parse_directional(value: &String) -> ParseResult<Directional> {
+    match value.as_str() {
+        "up" => Ok(Directional::Up),
+        "down" => Ok(Directional::Down),
+        "left" => Ok(Directional::Left),
+        "right" => Ok(Directional::Right),
+        e => Err(ParseError::StringMismatch(vec!["up".to_string(), "down".to_string(), "left".to_string(), "right".to_string()], e.to_string())),
+    }
+}
+
+pub fn parse_sibling(value: &String) -> ParseResult<FocusSibling> {
+    match value.as_str() { 
+        "prev" | "previous" => Ok(FocusSibling::Prev),
+        "next" => Ok(FocusSibling::Next),
+        e => Err(ParseError::StringMismatch(vec!["prev".to_string(), "next".to_string()], e.to_string())),
+    }
+}
+
+pub fn parse_hierarchy(value: &String) -> ParseResult<Hierarchy> {
+    match value.as_str() {
+        "child" => Ok(Hierarchy::Child),
+        "parent" => Ok(Hierarchy::Parent),
+        e => Err(ParseError::StringMismatch(vec!["parent".to_string(), "child".to_string()], e.to_string())),
     }
 }

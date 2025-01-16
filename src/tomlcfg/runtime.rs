@@ -16,11 +16,12 @@
 
 use crate::tomlcfg::{ParseResult, ParseError};
 use crate::tomlcfg::base::{find, find_opt};
-use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8, parse_splitopt};
-use crate::{one_of, as_type, as_type_opt};
-use crate::sway::commands::Runtime;
+use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8, parse_splitopt, parse_directional, parse_sibling, parse_hierarchy};
+use crate::{one_of, as_type, as_type_opt, one_of_type};
+use crate::sway::commands::{Runtime, SubFocus};
 use toml::{Table, Value};
 
+// Parse a runtime command from a TOML table.
 pub fn parse_runtime(table: &Table) -> ParseResult<Runtime> {
     one_of!(table,
         "exit", parse_exit,
@@ -51,7 +52,54 @@ fn parse_floating(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_focus(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    fn pf_directional(value: &Value) -> ParseResult<Runtime> {
+        let direction = parse_directional(as_type!(value, Value::String)?)?;
+        Ok(Runtime::Focus(SubFocus::Directional(direction)))
+    }
+    
+    fn pf_sibling(value: &Value) -> ParseResult<Runtime> {
+        let sibling = parse_sibling(as_type!(value, Value::String)?)?;
+        Ok(Runtime::Focus(SubFocus::Sibling(sibling)))
+    }
+    
+    fn pf_hierarchy(value: &Value) -> ParseResult<Runtime> {
+        let hierarchy = parse_hierarchy(as_type!(value, Value::String)?)?;
+        Ok(Runtime::Focus(SubFocus::Hierarchy(hierarchy)))
+    }
+    
+    fn pf_output(value: &Value) -> ParseResult<Runtime> {
+        fn pf_named(value: &String) -> ParseResult<Runtime> {
+            Ok(Runtime::Focus(SubFocus::OutputNamed(value.clone())))
+        }
+        
+        fn pf_output_named(value: &Value) -> ParseResult<Runtime> {
+            pf_named(as_type!(value, Value::String)?)
+        }
+        
+        fn pf_output_directional(value: &Value) -> ParseResult<Runtime> {
+            let direction = parse_directional(as_type!(value, Value::String)?)?;
+            Ok(Runtime::Focus(SubFocus::OutputDirectional(direction)))
+        }
+        
+        fn pf_table(value: &Table) -> ParseResult<Runtime> {
+            one_of!(value,
+                "directional", pf_output_directional,
+                "named", pf_output_named
+            )
+        }
+        
+        one_of_type!(value,
+            Value::String, pf_named,
+            Value::Table, pf_table
+        )
+    }
+    
+    one_of!(as_type!(value, Value::Table)?,
+        "directional", pf_directional,
+        "sibling", pf_sibling,
+        "hierarchy", pf_hierarchy,
+        "output", pf_output
+    )
 }
 
 fn parse_layout(value: &Value) -> ParseResult<Runtime> {
