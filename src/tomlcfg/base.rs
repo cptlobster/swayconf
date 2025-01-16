@@ -30,13 +30,24 @@ macro_rules! as_type {
 }
 
 #[macro_export]
+macro_rules! as_type_opt {
+    ($input:expr, $t:path) => {
+        match $input {
+            Some($t(v)) => Ok(Some(v)),
+            None => Ok(None),
+            _ => Err(ParseError::IncorrectType(vec![stringify!($t).to_string()])),
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! one_of_type {
-    ($input:expr, $($t:path, $target:ident), *) => {
+    ($input:expr, $($t:path, $target:ident), *) => {{
         match $input {
             $($t(v) => $target(v),)*
             _ => Err(ParseError::IncorrectType(vec![$(stringify!($t).to_string(),)*])),
         }
-    };
+    }};
 }
 
 #[macro_export]
@@ -74,6 +85,11 @@ pub fn find(table: &Table, key: String) -> ParseResult<&Value> {
         None => Err(ParseError::KeyNotFound(key)),
     }
 }
+
+pub fn find_opt(table: &Table, key: String) -> Option<&Value> {
+    table.get(&key)
+}
+
 pub fn table(input: &Table, key: String) -> ParseResult<&Table> {
     find(input, key).and_then(|table| as_type!(table, Value::Table))
 }

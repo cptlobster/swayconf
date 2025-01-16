@@ -15,6 +15,7 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 pub mod base;
 pub mod runtime;
+mod options;
 
 use thiserror::Error;
 
@@ -27,8 +28,14 @@ pub enum ParseError {
     IncorrectType(Vec<String>),
     #[error("One and only one key must be provided: found ({})", .0.join(", "))]
     MultiKey(Vec<String>),
+    #[error("String does not match: expected one of ({}), found {}", .0.join(", "), .1)]
+    StringMismatch(Vec<String>, String),
     #[error("TOML parse error: {0}")]
     TomlError(#[from] toml::de::Error),
+    #[error("Conflict: keys {0} and {1} cannot have the same value")]
+    ConflictDiff(String, String),
+    #[error("Conflict: keys {0} and {1} cannot both be defined")]
+    ConflictKey(String, String),
     #[error("Not implemented")]
     NotImplemented,
 }

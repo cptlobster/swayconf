@@ -1,4 +1,3 @@
-use crate::tomlcfg::base::find;
 /// Parses structure of runtime commands in TOML and converts to Swayconf structs
 //     Copyright (C) 2024  Dustin Thomas <io@cptlobster.dev>
 //
@@ -16,11 +15,13 @@ use crate::tomlcfg::base::find;
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::tomlcfg::{ParseResult, ParseError};
-use crate::{one_of, as_type};
+use crate::tomlcfg::base::{find, find_opt};
+use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8, parse_splitopt};
+use crate::{one_of, as_type, as_type_opt};
 use crate::sway::commands::Runtime;
 use toml::{Table, Value};
 
-fn parse_runtime(table: &Table) -> ParseResult<Runtime> {
+pub fn parse_runtime(table: &Table) -> ParseResult<Runtime> {
     one_of!(table,
         "exit", parse_exit,
         "floating", parse_floating,
@@ -45,7 +46,8 @@ fn parse_exit(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_floating(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    let tb = parse_togglable_bool(value)?;
+    Ok(Runtime::Floating(tb))
 }
 
 fn parse_focus(value: &Value) -> ParseResult<Runtime> {
@@ -61,15 +63,26 @@ fn parse_move(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_reload(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    as_type!(value, Value::Boolean)?;
+    Ok(Runtime::Reload)
 }
 
 fn parse_resize(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    let table = as_type!(value, Value::Table)?;
+    let change = parse_size(as_type!(find(table, "change".to_string())?, Value::String)?)?;
+    let x = to_u8(as_type_opt!(find_opt(table, "x".to_string()), Value::Integer)?);
+    let y = to_u8(as_type_opt!(find_opt(table, "y".to_string()), Value::Integer)?);
+    let unit = parse_units(value)?;
+    if x.is_some() == y.is_some() {
+        Err(ParseError::ConflictDiff("x".to_string(), "y".to_string()))
+    } else {
+        Ok(Runtime::Resize { change, x, y, unit })
+    }
 }
 
 fn parse_split(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    let split = parse_splitopt(as_type!(value, Value::String)?)?;
+    Ok(Runtime::Split(split))
 }
 
 fn parse_bindsym(value: &Value) -> ParseResult<Runtime> {
@@ -77,19 +90,34 @@ fn parse_bindsym(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_exec(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    let table = as_type!(value, Value::Table)?;
+    let mut command = as_type!(find(table, "command".to_string())?, Value::String)?.clone();
+    let nsid = *as_type_opt!(find_opt(table, "no-startup-id".to_string()), Value::Boolean)?.unwrap_or(&false);
+
+    if nsid { command = format!("--no-startup-id {}", command); };
+    Ok(Runtime::Exec(command))
 }
 
 fn parse_exec_always(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    let table = as_type!(value, Value::Table)?;
+    let mut command = as_type!(find(table, "command".to_string())?, Value::String)?.clone();
+    let nsid = *as_type_opt!(find_opt(table, "no-startup-id".to_string()), Value::Boolean)?.unwrap_or(&false);
+
+    if nsid { command = format!("--no-startup-id {}", command); };
+    Ok(Runtime::ExecAlways(command))
 }
 
 fn parse_kill(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    as_type!(value, Value::Boolean)?;
+    Ok(Runtime::Kill)
 }
 
 fn parse_set(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    let table = as_type!(value, Value::Table)?;
+    let name = as_type!(find(table, "name".to_string())?, Value::String)?.clone();
+    let value = as_type!(find(table, "value".to_string())?, Value::String)?.clone();
+    
+    Ok(Runtime::Set{ name, value })
 }
 
 fn parse_workspace(value: &Value) -> ParseResult<Runtime> {
