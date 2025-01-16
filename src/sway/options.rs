@@ -15,47 +15,48 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter, Result as FmtResult};
+use serde::{Deserialize, Serialize};
 use subenum::subenum;
 use crate::sway::options::ContainerType::Container;
 use crate::sway::options::Size::Grow;
 
 /// Possible options for resize commands.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Size {
     Shrink,
     Grow,
 }
 
 /// Possible options for container types.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ContainerType {
     Container,
     Window,
 }
 
 /// Possible options for units.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Units {
     Px,
     Ppt,
 }
 
 /// Possible options for parent/child hierarchy commands.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Hierarchy {
     Parent,
     Child,
 }
 
 /// Possible options for sibling hierarchy commands.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FocusSibling {
     Prev,
     Next,
 }
 
 /// Possible options for relative workspaces.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RelWorkspace {
     Prev,
     Next,
@@ -63,7 +64,7 @@ pub enum RelWorkspace {
 }
 
 /// Possible directional arguments.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Directional {
     Up,
     Down,
@@ -72,7 +73,7 @@ pub enum Directional {
 }
 
 /// "Togglable boolean"; Has true/false value, but also "toggle" which will switch from true to false and vice versa.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TogglableBool {
     Enable,
     Disable,
@@ -80,7 +81,7 @@ pub enum TogglableBool {
 }
 
 /// Possible layout options.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Layout {
     Default,
     Stacking,
@@ -91,7 +92,7 @@ pub enum Layout {
 
 /// Possibly options for cycling layouts.
 #[subenum(LayoutCycleSingle, LayoutCycleMulti)]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum LayoutCycle {
     #[subenum(LayoutCycleMulti)]
     Stacking,
@@ -108,7 +109,7 @@ pub enum LayoutCycle {
 }
 
 /// Possible split options.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Split {
     Horizontal,
     Vertical,
@@ -116,7 +117,7 @@ pub enum Split {
 }
 
 /// Possible flags for bindsym commands.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Bindsym {
     WholeWindow,
     Border,

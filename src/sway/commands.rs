@@ -17,9 +17,10 @@ use subenum::subenum;
 use crate::sway::options;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::path::PathBuf;
+use serde::{Serialize, Deserialize};
 
 /// All top-level command declarations. These are developed using the criteria specified in the `sway(5)` manpage.
-#[subenum(Config, Runtime)]
+#[subenum(Config, Runtime(derive(Serialize, Deserialize)))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Commands {
     #[subenum(Config)]
@@ -63,7 +64,7 @@ pub enum Commands {
 }
 
 /// Subcommands for focus.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SubFocus {
     Directional(options::Directional),
     Sibling(options::FocusSibling),
@@ -73,7 +74,7 @@ pub enum SubFocus {
 }
 
 /// Subcommands for layout.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SubLayout {
     Set(options::Layout),
     Cycle(options::LayoutCycleSingle),
@@ -81,7 +82,7 @@ pub enum SubLayout {
 }
 
 /// Subcommands for move.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SubMove {
     Directional{direction: options::Directional, px: Option<u8>},
     Coordinates{x: i8, y: i8, x_unit: options::Units, y_unit: options::Units, absolute: bool},

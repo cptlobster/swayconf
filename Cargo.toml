@@ -4,9 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# configuration file parsing
+serde = { version = "1.0.217", features = ["derive"] }
 toml = "0.8.19"
+# subenum (used to differentiate runtime and config arguments)
 subenum = "1.1.2"
+# homedir (used for getting the user's homedir for default config file placement)
 homedir = "0.3.4"
+# logging and error handling
 thiserror = "2.0.11"
 env_logger = "0.11.6"
 log = "0.4.25"

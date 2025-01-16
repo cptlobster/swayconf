@@ -291,6 +291,7 @@ dependencies = [
  "env_logger",
  "homedir",
  "log",
+ "serde",
  "subenum",
  "thiserror",
  "toml",
