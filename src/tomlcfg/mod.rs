@@ -16,6 +16,7 @@
 pub mod base;
 pub mod runtime;
 mod options;
+mod config;
 
 use thiserror::Error;
 
