@@ -70,7 +70,7 @@ pub fn parse_set(value: &Value) -> ParseResult<Config> {
 pub fn parse_bar(value: &Value) -> ParseResult<Config> {
     let table = as_type!(value, Value::Table)?;
     let bar_id = as_type_opt!(find_opt(table, "id".to_string()), Value::String)?.cloned().unwrap_or("".to_string());
-    let subcommands = as_type!(find(table, "status-command".to_string())?, Value::String)?.clone();
+    let subcommands = format!("status_command {}", as_type!(find(table, "status-command".to_string())?, Value::String)?.clone());
     Ok(Config::Bar { bar_id, subcommands })
 }
 
@@ -83,7 +83,7 @@ pub fn parse_include(value: &Value) -> ParseResult<Config> {
     let pathstr = as_type!(value, Value::String)?;
     let path = PathBuf::from(pathstr);
     if path.extension() == Some(OsStr::new("toml")) {
-        println!("WARN: This include references a TOML file. Make sure to generate this file via swayconf as well.");
+        log::warn!("This include references a TOML file. Make sure to generate this file via swayconf as well.");
         Ok(Config::Include(path.with_extension(OsStr::new(""))))
     } else {
         Ok(Config::Include(path))
