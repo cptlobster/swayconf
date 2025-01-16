@@ -70,6 +70,15 @@ pub fn to_u8_opt(input: Option<&i64>) -> Option<u8> {
     }
 }
 
+pub fn to_i8(input: &i64) -> i8 { *input as i8 }
+
+pub fn to_i8_opt(input: Option<&i64>) -> Option<i8> {
+    match input {
+        Some(n) => Some(to_i8(n)),
+        None => None,
+    }
+}
+
 pub fn parse_splitopt(value: &String) -> ParseResult<Split> {
     match value.as_str() {
         "h" | "horizontal" => Ok(Split::Horizontal),
