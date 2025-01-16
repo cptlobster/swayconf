@@ -1,3 +1,4 @@
+use toml::Table;
 /// Parses structure of options in TOML and converts to Swayconf structs
 //     Copyright (C) 2024  Dustin Thomas <io@cptlobster.dev>
 //
@@ -15,7 +16,7 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use toml::value::Value;
-use crate::sway::options::{Directional, FocusSibling, Hierarchy, Size, Split, TogglableBool, Units};
+use crate::sway::options::{Bindsym, Directional, FocusSibling, Hierarchy, Layout, LayoutCycleMulti, LayoutCycleSingle, Size, Split, TogglableBool, Units};
 use crate::tomlcfg::{ParseResult, ParseError};
 use crate::tomlcfg::base::find_opt;
 use crate::{one_of_type, as_type, as_type_opt};
@@ -60,9 +61,11 @@ pub fn parse_units(value: &Value) -> ParseResult<Units> {
     }
 }
 
-pub fn to_u8(input: Option<&i64>) -> Option<u8> {
+pub fn to_u8(input: &i64) -> u8 { *input as u8 }
+
+pub fn to_u8_opt(input: Option<&i64>) -> Option<u8> {
     match input {
-        Some(n) => Some(*n as u8),
+        Some(n) => Some(to_u8(n)),
         None => None,
     }
 }
@@ -100,4 +103,61 @@ pub fn parse_hierarchy(value: &String) -> ParseResult<Hierarchy> {
         "parent" => Ok(Hierarchy::Parent),
         e => Err(ParseError::StringMismatch(vec!["parent".to_string(), "child".to_string()], e.to_string())),
     }
+}
+
+pub fn parse_layoutopt(value: &String) -> ParseResult<Layout> {
+    match value.as_str() { 
+        "default" => Ok(Layout::Default),
+        "stacking" => Ok(Layout::Stacking),
+        "tabbed" => Ok(Layout::Tabbed),
+        "splith" | "split-h" => Ok(Layout::SplitH),
+        "splitv" | "split-v" => Ok(Layout::SplitV),
+        e => Err(ParseError::StringMismatch(vec!["default".to_string(), "stacking".to_string(), "tabbed".to_string(), "splith".to_string(), "splitv".to_string()], e.to_string())),
+    }
+}
+
+pub fn parse_layoutcyclesingle(value: &String) -> ParseResult<LayoutCycleSingle> {
+    match value.as_str() {
+        "all" => Ok(LayoutCycleSingle::All),
+        "split" => Ok(LayoutCycleSingle::Split),
+        e => Err(ParseError::StringMismatch(vec!["all".to_string(), "split".to_string()], e.to_string())),
+    }
+}
+
+pub fn parse_layoutcyclemulti(value: &String) -> ParseResult<LayoutCycleMulti> {
+    match value.as_str() {
+        "stacking" => Ok(LayoutCycleMulti::Stacking),
+        "tabbed" => Ok(LayoutCycleMulti::Tabbed),
+        "split" => Ok(LayoutCycleMulti::Split),
+        "splith" | "split-h" => Ok(LayoutCycleMulti::SplitH),
+        "splitv" | "split-v" => Ok(LayoutCycleMulti::SplitV),
+        e => Err(ParseError::StringMismatch(vec!["stacking".to_string(), "tabbed".to_string(), "split".to_string(), "split_h".to_string(), "split_v".to_string()], e.to_string())),
+    }
+}
+
+pub fn collect_bindsym_args(value: &Table) -> ParseResult<Vec<Bindsym>> {
+    let args = vec!["whole-window", "border", "exclude-titlebar", "release", "locked",
+        "to-code", "no-warn", "no-repeat", "inhibited"];
+    let enums = vec![Bindsym::WholeWindow, Bindsym::Border, Bindsym::ExcludeTitlebar,
+        Bindsym::Release, Bindsym::Locked, Bindsym::ToCode, Bindsym::NoWarn, Bindsym::NoRepeat,
+        Bindsym::Inhibited];
+    
+    let mut arg_collection = vec![];
+    
+    for (a, e) in args.iter().zip(enums) {
+        match find_opt(value, a.to_string()) {
+            Some(value) => if *as_type!(value, Value::Boolean)? {arg_collection.push(e)},
+            None => continue,
+        };
+    }
+    
+    match find_opt(value, "input-device".to_string()) {
+        Some(value) => {
+            let device = as_type!(value, Value::String)?.clone();
+            arg_collection.push(Bindsym::InputDevice(device));
+        }
+        None => {}
+    }
+    
+    Ok(arg_collection)
 }

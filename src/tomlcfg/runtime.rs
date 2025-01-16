@@ -15,10 +15,10 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::tomlcfg::{ParseResult, ParseError};
-use crate::tomlcfg::base::{find, find_opt};
-use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8, parse_splitopt, parse_directional, parse_sibling, parse_hierarchy};
+use crate::tomlcfg::base::{find, find_opt, table};
+use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8_opt, to_u8, parse_splitopt, parse_directional, parse_sibling, parse_hierarchy, parse_layoutopt, parse_layoutcyclesingle, parse_layoutcyclemulti, collect_bindsym_args};
 use crate::{one_of, as_type, as_type_opt, one_of_type};
-use crate::sway::commands::{Runtime, SubFocus};
+use crate::sway::commands::{Runtime, SubFocus, SubLayout};
 use toml::{Table, Value};
 
 // Parse a runtime command from a TOML table.
@@ -103,7 +103,28 @@ fn parse_focus(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_layout(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    fn parse_set(value: &Value) -> ParseResult<Runtime> {
+        let layout = parse_layoutopt(as_type!(value, Value::String)?)?;
+        Ok(Runtime::Layout(SubLayout::Set(layout)))
+    }
+    fn parse_cycle(value: &Value) -> ParseResult<Runtime> {
+        fn parse_lcs(value: &String) -> ParseResult<Runtime> {
+            let arg = parse_layoutcyclesingle(value)?;
+            Ok(Runtime::Layout(SubLayout::Cycle(arg)))
+        }
+        fn parse_lcm(value: &Vec<Value>) -> ParseResult<Runtime> {
+            let args = value.iter().map(|m| parse_layoutcyclemulti(as_type!(m, Value::String)?)?).collect();
+            Ok(Runtime::Layout(SubLayout::CycleList(args)))
+        }
+        one_of_type!(value,
+            Value::String, parse_lcs,
+            Value::Array, parse_lcm
+        )
+    }
+    one_of!(as_type!(value, Value::Table)?,
+        "set", parse_set,
+        "cycle", parse_cycle
+    )
 }
 
 fn parse_move(value: &Value) -> ParseResult<Runtime> {
@@ -118,8 +139,8 @@ fn parse_reload(value: &Value) -> ParseResult<Runtime> {
 fn parse_resize(value: &Value) -> ParseResult<Runtime> {
     let table = as_type!(value, Value::Table)?;
     let change = parse_size(as_type!(find(table, "change".to_string())?, Value::String)?)?;
-    let x = to_u8(as_type_opt!(find_opt(table, "x".to_string()), Value::Integer)?);
-    let y = to_u8(as_type_opt!(find_opt(table, "y".to_string()), Value::Integer)?);
+    let x = to_u8_opt(as_type_opt!(find_opt(table, "x".to_string()), Value::Integer)?);
+    let y = to_u8_opt(as_type_opt!(find_opt(table, "y".to_string()), Value::Integer)?);
     let unit = parse_units(value)?;
     if x.is_some() == y.is_some() {
         Err(ParseError::ConflictDiff("x".to_string(), "y".to_string()))
@@ -134,7 +155,11 @@ fn parse_split(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_bindsym(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    let t = as_type!(value, Value::Table)?;
+    let keys = as_type!(find(t, "keys".to_string())?, Value::String)?.split("+").map(|a| a.to_string()).collect();
+    let command = Box::new(parse_runtime(table(t, "command".to_string())?)?);
+    let flags = collect_bindsym_args(t)?;
+    Ok(Runtime::Bindsym{ keys, flags, command })
 }
 
 fn parse_exec(value: &Value) -> ParseResult<Runtime> {
@@ -169,7 +194,20 @@ fn parse_set(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_workspace(value: &Value) -> ParseResult<Runtime> {
-    Err(ParseError::NotImplemented)
+    fn parse_wsn(value: &i64) -> ParseResult<Runtime> {
+        let number = to_u8(value);
+        Ok(Runtime::Workspace{ number, name: None })
+    }
+    fn parse_wst(value: &Table) -> ParseResult<Runtime> {
+        let number = to_u8(as_type!(find(value, "number".to_string())?, Value::Integer)?);
+        let name = as_type_opt!(find_opt(value, "name".to_string()), Value::String)?.cloned();
+        Ok(Runtime::Workspace{ number, name })
+    }
+    
+    one_of_type!(value,
+        Value::Integer, parse_wsn,
+        Value::Table, parse_wst
+    )
 }
 
 #[cfg(test)]

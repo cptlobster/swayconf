@@ -51,7 +51,7 @@ pub enum Commands {
     #[subenum(Config, Runtime)]
     Set{name: String, value: String},
     #[subenum(Runtime)]
-    Workspace{ number: i8, name: Option<String> },
+    Workspace{ number: u8, name: Option<String> },
     #[subenum(Config, Runtime)]
     Else(String),
     #[subenum(Config)]
