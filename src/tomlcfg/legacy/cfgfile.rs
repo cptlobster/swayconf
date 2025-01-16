@@ -16,12 +16,12 @@
 
 use std::path::PathBuf;
 use toml::{Table, Value};
-use crate::tomlcfg::base::{find, find_opt, table};
+use crate::tomlcfg::legacy::base::{find, find_opt, table};
 use crate::as_type_opt;
 use crate::sway::commands::Config;
-use crate::tomlcfg::{ParseResult, ParseError};
-use crate::tomlcfg::config::{parse_bindsym_nokeys, parse_exec, parse_exec_always, parse_include,
-                             parse_bar, gen_set};
+use crate::tomlcfg::legacy::{ParseResult, ParseError};
+use crate::tomlcfg::legacy::config::{parse_bindsym_nokeys, parse_exec, parse_exec_always, 
+                                     parse_include, parse_bar, gen_set};
 use crate::sway::config::ConfigFile;
 
 fn parse_includes(table: &Table) -> ParseResult<Vec<Config>> {

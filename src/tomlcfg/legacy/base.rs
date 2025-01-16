@@ -16,7 +16,7 @@
 
 use std::fs::read_to_string;
 use std::path::{PathBuf};
-use crate::tomlcfg::{ParseError, ParseResult};
+use crate::tomlcfg::legacy::{ParseError, ParseResult};
 use toml::{Table, Value};
 use log;
 

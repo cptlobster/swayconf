@@ -16,13 +16,13 @@
 
 use std::ffi::OsStr;
 use std::path::PathBuf;
-use crate::tomlcfg::{ParseResult, ParseError};
-use crate::tomlcfg::base::{find, find_opt, table};
-use crate::tomlcfg::options::{collect_bindsym_args};
+use crate::tomlcfg::legacy::{ParseResult, ParseError};
+use crate::tomlcfg::legacy::base::{find, find_opt, table};
+use crate::tomlcfg::legacy::options::{collect_bindsym_args};
 use crate::{as_type, as_type_opt};
 use crate::sway::commands::{Config};
 use toml::{Value};
-use crate::tomlcfg::runtime::parse_runtime;
+use crate::tomlcfg::legacy::runtime::parse_runtime;
 
 pub fn parse_exec(value: &Value) -> ParseResult<Config> {
     let table = as_type!(value, Value::Table)?;

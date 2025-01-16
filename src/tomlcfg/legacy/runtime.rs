@@ -14,12 +14,13 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::tomlcfg::{ParseResult, ParseError};
-use crate::tomlcfg::base::{find, find_opt, table};
-use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8_opt, to_u8,
-                              to_i8, parse_splitopt, parse_directional, parse_sibling,
-                              parse_hierarchy, parse_layoutopt, parse_layoutcyclesingle,
-                              parse_layoutcyclemulti, collect_bindsym_args};
+use crate::tomlcfg::legacy::{ParseResult, ParseError};
+use crate::tomlcfg::legacy::base::{find, find_opt, table};
+use crate::tomlcfg::legacy::options::{parse_togglable_bool, parse_size, parse_units, to_u8_opt,
+                                      to_u8, to_i8, parse_splitopt, parse_directional,
+                                      parse_sibling, parse_hierarchy, parse_layoutopt,
+                                      parse_layoutcyclesingle, parse_layoutcyclemulti,
+                                      collect_bindsym_args};
 use crate::{one_of, as_type, as_type_opt, one_of_type};
 use crate::sway::commands::{Runtime, SubFocus, SubLayout, SubMove};
 use crate::sway::options::{FocusSibling, LayoutCycleMulti, RelWorkspace, Units};
@@ -335,7 +336,7 @@ fn parse_workspace(value: &Value) -> ParseResult<Runtime> {
 mod tests {
     use crate::sway::commands::SubMove;
     use crate::sway::options::Directional;
-    use crate::tomlcfg::base::from_str;
+    use crate::tomlcfg::legacy::base::from_str;
     use super::*;
     
     #[test]

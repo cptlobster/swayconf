@@ -17,8 +17,8 @@ use toml::Table;
 
 use toml::value::Value;
 use crate::sway::options::{Bindsym, Directional, FocusSibling, Hierarchy, Layout, LayoutCycleMulti, LayoutCycleSingle, Size, Split, TogglableBool, Units};
-use crate::tomlcfg::{ParseResult, ParseError};
-use crate::tomlcfg::base::find_opt;
+use crate::tomlcfg::legacy::{ParseResult, ParseError};
+use crate::tomlcfg::legacy::base::find_opt;
 use crate::{one_of_type, as_type, as_type_opt};
 
 pub fn parse_togglable_bool(value: &Value) -> ParseResult<TogglableBool> {
