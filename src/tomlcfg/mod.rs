@@ -20,7 +20,7 @@ use thiserror::Error;
 
 /// Catch-all enum for parser-related errors.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
-enum ParseError {
+pub enum ParseError {
     #[error("Key not found: {0}")]
     KeyNotFound(String),
     #[error("Incorrect type: Must be one of the following: ({})", .0.join(", "))]
@@ -34,4 +34,4 @@ enum ParseError {
 }
 
 /// type alias for parser results. Supports any type for `Ok()` and `ParseError` enum for `Err()`.
-type ParseResult<T> = Result<T, ParseError>;
+pub type ParseResult<T> = Result<T, ParseError>;

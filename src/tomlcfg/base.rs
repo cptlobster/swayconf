@@ -21,10 +21,20 @@ use toml::{Table, Value};
 
 #[macro_export]
 macro_rules! as_type {
-    ($input:expr, $target:path) => {
+    ($input:expr, $t:path) => {
         match $input {
-            $target(v) => Ok(v),
-            _ => Err(ParseError::IncorrectType(vec![stringify!($target).to_string()])),
+            $t(v) => Ok(v),
+            _ => Err(ParseError::IncorrectType(vec![stringify!($t).to_string()])),
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! one_of_type {
+    ($input:expr, $($t:path, $target:ident), *) => {
+        match $input {
+            $($t(v) => $target(v),)*
+            _ => Err(ParseError::IncorrectType(vec![$(stringify!($t).to_string(),)*])),
         }
     };
 }
