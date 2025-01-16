@@ -123,3 +123,37 @@ fn parse_set(value: &Value) -> ParseResult<Runtime> {
 fn parse_workspace(value: &Value) -> ParseResult<Runtime> {
     Err(ParseError::NotImplemented)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::sway::commands::SubMove;
+    use crate::sway::options::Directional;
+    use crate::tomlcfg::base::from_str;
+    use super::*;
+    
+    #[test]
+    fn test_parse_runtime() {
+        let teststrs = vec![
+            "exit = true".to_string(),
+            "exec = { command = \"ls -la ~\", no-startup-id = true }".to_string(),
+            "set = { name = \"beans\", value = \"a\" }".to_string(),
+            "move.direction = \"down\"".to_string()
+        ];
+        
+        let expecteds = vec![
+            Runtime::Exit,
+            Runtime::Exec("--no-startup-id ls -la ~".to_string()),
+            Runtime::Set{ name: "beans".to_string(), value: "a".to_string() },
+            Runtime::Move(SubMove::Directional { direction: Directional::Down, px: None })
+        ];
+        
+        for (teststr, expected) in teststrs.iter().zip(expecteds) {
+            println!("TEST: {}", teststr);
+            let result= from_str(teststr.clone()).and_then(|t| parse_runtime(&t));
+            
+            assert!(result.is_ok());
+            assert_eq!(result.unwrap(), expected);
+            println!("OKAY: {}", expected.to_string());
+        }
+    }
+}
