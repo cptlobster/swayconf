@@ -88,6 +88,7 @@ pub enum SubMove {
     Center{absolute: bool},
     ToCursor,
     ToWorkspace(options::RelWorkspace),
+    ToWorkspaceNamed(u8, Option<String>),
     ToWorkspaceOnOutput(options::FocusSibling),
     BackAndForth,
     ToDirectionalOutput(options::Directional),
@@ -98,7 +99,7 @@ pub enum SubMove {
 impl Display for Commands {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self {
-            Commands::Bar{bar_id, subcommands} => { write!(f, "bar {} {{\n{}\n}})", bar_id, subcommands) }
+            Commands::Bar{bar_id, subcommands} => { write!(f, "bar {} {{\n{}\n}}", bar_id, subcommands) }
             Commands::Bindsym{flags, keys, command} => {
                 match *command.clone() {
                     Runtime::Bindsym{flags: _, keys: _, command: _} => panic!("Nested bindsyms are not allowed"),
@@ -210,6 +211,10 @@ impl Display for SubMove {
                 write!(f, "position cursor")
             }
             SubMove::ToWorkspace(ws) => write!(f, "container to workspace {}", ws),
+            SubMove::ToWorkspaceNamed(num, str) => match str {
+                Some(s) => write!(f, "container to workspace {} {}", num, s),
+                None => write!(f, "container to workspace {}", num),
+            }
             SubMove::ToWorkspaceOnOutput(ws) => write!(f, "container to workspace {}_on_output", ws),
             SubMove::BackAndForth => write!(f, "container to workspace back_and_forth"),
             SubMove::ToDirectionalOutput(dir) => write!(f, "container to output {}", dir),

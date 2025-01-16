@@ -21,7 +21,7 @@ use std::io::{Write, Result};
 use std::path::PathBuf;
 use homedir::my_home;
 
-trait WritableConfig {
+pub trait WritableConfig {
     /// Write the config file contents.
     fn write(&self) -> Result<usize>;
     /// Strip comments and whitespace from the config file.
@@ -58,7 +58,8 @@ impl ConfigFile {
 
 impl WritableConfig for ConfigFile {
     fn write(&self) -> Result<usize> {
-        File::open(self.path.clone())
+        log::debug!("Writing to file {}", self.path.display());
+        File::create(self.path.clone())
             .and_then(|mut f| {f.write(self.to_string().as_bytes())})
     }
 

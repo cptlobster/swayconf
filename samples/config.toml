@@ -80,14 +80,14 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 # container split
 "$mod+h".split = "horizontal"
 "$mod+v".split = "vertical"
-"$mod+f".fullscreen = "toggle"
+#"$mod+f".fullscreen = "toggle"
 # change container layouts
 "$mod+s".layout.set = "stacking"
 "$mod+w".layout.set = "tabbed"
-"$mod+e".layout.toggle = "split"
+"$mod+e".layout.cycle = "split"
 # toggle tiling/floating
 "$mod+Shift+Space".floating = "toggle"
-"$mod+r".mode = "resize"
+#"$mod+r".mode = "resize"
 # workspaces
 "$mod+1".workspace = 1
 "$mod+2".workspace = 2
@@ -121,7 +121,7 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 "XF86AudioPrev".exec = { command = "playerctl previous", no-startup-id = true }
 # config
 "$mod+Shift+c".reload = true
-"$mod+Shift+r".restart = true
+#"$mod+Shift+r".restart = true
 # power options
 "$mod+l".exec = { command = "$lock_sh", no-startup-id = true }
 "$mod+Shift+e".exec.command = "rofi -show p -modi p:rofi-power-menu"

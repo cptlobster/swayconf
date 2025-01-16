@@ -17,7 +17,7 @@ pub mod base;
 pub mod runtime;
 mod options;
 mod config;
-mod cfgfile;
+pub(crate) mod cfgfile;
 
 use thiserror::Error;
 

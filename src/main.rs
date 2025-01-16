@@ -16,6 +16,27 @@
 mod sway;
 mod tomlcfg;
 
+use std::path::{Path, PathBuf};
+use tomlcfg::base::read;
+use tomlcfg::cfgfile::asm_config;
+use crate::sway::config::{ConfigFile, WritableConfig};
+use crate::tomlcfg::ParseResult;
+
+fn gen_conf(path: PathBuf) -> ParseResult<ConfigFile> {
+    let cfg = read(path)?;
+    asm_config(Path::new("samples/config").to_path_buf(), &cfg)
+}
+
 fn main() {
-    println!("Hello, world!");
+    env_logger::init();
+
+    match gen_conf(PathBuf::from("./samples/config.toml")) {
+        Ok(file) => {
+            match file.write() {
+                Ok(_) => log::info!("Successfully wrote to config file"),
+                Err(e) => log::error!("Error writing config file: {}", e),
+            }
+        }
+        Err(e) => { log::error!("Error generating config: {}", e); }
+    }
 }

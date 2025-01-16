@@ -16,7 +16,7 @@
 
 use crate::tomlcfg::{ParseResult, ParseError};
 use crate::tomlcfg::base::{find, find_opt, table};
-use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8_opt, to_u8, 
+use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8_opt, to_u8,
                               to_i8, parse_splitopt, parse_directional, parse_sibling,
                               parse_hierarchy, parse_layoutopt, parse_layoutcyclesingle,
                               parse_layoutcyclemulti, collect_bindsym_args};
@@ -141,7 +141,7 @@ fn parse_move(value: &Value) -> ParseResult<Runtime> {
         let direction = parse_directional(as_type!(value, Value::String)?)?;
         Ok(Runtime::Move(SubMove::Directional{ direction, px: None }))
     }
-    
+
     fn pm_coords(value: &Value) -> ParseResult<Runtime> {
         let table = as_type!(value, Value::Table)?;
         let x = to_i8(as_type!(find(table, "x".to_string())?, Value::Integer)?);
@@ -151,28 +151,28 @@ fn parse_move(value: &Value) -> ParseResult<Runtime> {
         let absolute = *as_type!(find(table, "absolute".to_string())?, Value::Boolean)?;
         Ok(Runtime::Move(SubMove::Coordinates { x, y, x_unit, y_unit, absolute }))
     }
-    
+
     fn pm_center(value: &Value) -> ParseResult<Runtime> {
         fn pm_c_bool(value: &bool) -> ParseResult<&bool> {
             Ok(value)
         }
-        
+
         fn pm_c_tab(value: &Table) -> ParseResult<&bool> {
             as_type!(find(value, "absolute".to_string())?, Value::Boolean)
         }
-        
+
         let absolute = *one_of_type!(value,
             Value::Boolean, pm_c_bool,
             Value::Table, pm_c_tab
         )?;
         Ok(Runtime::Move(SubMove::Center { absolute }))
     }
-    
+
     fn pm_cursor(value: &Value) -> ParseResult<Runtime> {
         as_type!(value, Value::Boolean)?;
         Ok(Runtime::Move(SubMove::ToCursor))
     }
-    
+
     fn pm_workspace(value: &Value) -> ParseResult<Runtime> {
         fn pm_w_tab(value: &Table) -> ParseResult<Runtime> {
             fn pm_w_output(value: &Value) -> ParseResult<Runtime> {
@@ -186,13 +186,13 @@ fn parse_move(value: &Value) -> ParseResult<Runtime> {
                 as_type!(value, Value::Boolean)?;
                 Ok(Runtime::Move(SubMove::BackAndForth))
             }
-            
+
             one_of!(value,
                 "output", pm_w_output,
                 "back-and-forth", pm_w_bf
             )
         }
-        
+
         fn pm_w_str(value: &String) -> ParseResult<Runtime> {
             match value.as_str() {
                 "prev" | "previous" => Ok(Runtime::Move(SubMove::ToWorkspace(RelWorkspace::Prev))),
@@ -202,13 +202,19 @@ fn parse_move(value: &Value) -> ParseResult<Runtime> {
                 s => Err(ParseError::StringMismatch(vec!["back-and-forth".to_string()], s.to_string())),
             }
         }
-        
+
+        fn pm_w_int(value: &i64) -> ParseResult<Runtime> {
+            let i = to_u8(value);
+            Ok(Runtime::Move(SubMove::ToWorkspaceNamed(i, None)))
+        }
+
         one_of_type!(value,
             Value::Table, pm_w_tab,
-            Value::String, pm_w_str
+            Value::String, pm_w_str,
+            Value::Integer, pm_w_int
         )
     }
-    
+
     fn pm_output(value: &Value) -> ParseResult<Runtime> {
         fn pm_named(value: &String) -> ParseResult<Runtime> {
             Ok(Runtime::Move(SubMove::ToNamedOutput(value.clone())))
@@ -351,7 +357,7 @@ mod tests {
         for (teststr, expected) in teststrs.iter().zip(expecteds) {
             println!("TEST: {}", teststr);
             let result= from_str(teststr.clone()).and_then(|t| parse_runtime(&t));
-            
+
             assert!(result.is_ok());
             assert_eq!(result.unwrap(), expected);
             println!("OKAY: {}", expected.to_string());

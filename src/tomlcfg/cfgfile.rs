@@ -71,7 +71,7 @@ fn parse_bars(table: &Table) -> ParseResult<Option<Config>> {
     }
 }
 
-fn asm_config(path: PathBuf, table: &Table) -> ParseResult<ConfigFile> {
+pub fn asm_config(path: PathBuf, table: &Table) -> ParseResult<ConfigFile> {
     let mut sets = parse_sets(table)?;
     let mut includes = parse_includes(table)?;
     let mut execs = parse_execs(table)?;
@@ -139,7 +139,7 @@ fn asm_config(path: PathBuf, table: &Table) -> ParseResult<ConfigFile> {
             "Keybinds provided in the [bindsym] table",
         ].iter().map(|&s| Config::Comment(s.to_string())).collect();
         commands.append(&mut header);
-        commands.append(&mut sets);
+        commands.append(&mut bindsyms);
         commands.push(Config::Blank)
     }
 

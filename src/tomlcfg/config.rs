@@ -44,7 +44,7 @@ pub fn parse_exec_always(value: &Value) -> ParseResult<Config> {
 
 pub fn parse_bindsym_nokeys(keys: Vec<String>, value: &Value) -> ParseResult<Config> {
     let t = as_type!(value, Value::Table)?;
-    let command = Box::new(parse_runtime(table(t, "command".to_string())?)?);
+    let command = Box::new(parse_runtime(t)?);
     let flags = collect_bindsym_args(t)?;
     Ok(Config::Bindsym{ keys, flags, command })
 }
@@ -70,7 +70,7 @@ pub fn parse_set(value: &Value) -> ParseResult<Config> {
 pub fn parse_bar(value: &Value) -> ParseResult<Config> {
     let table = as_type!(value, Value::Table)?;
     let bar_id = as_type_opt!(find_opt(table, "id".to_string()), Value::String)?.cloned().unwrap_or("".to_string());
-    let subcommands = as_type!(find(table, "status_command".to_string())?, Value::String)?.clone();
+    let subcommands = as_type!(find(table, "status-command".to_string())?, Value::String)?.clone();
     Ok(Config::Bar { bar_id, subcommands })
 }
 
