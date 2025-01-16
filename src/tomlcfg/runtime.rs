@@ -19,6 +19,7 @@ use crate::tomlcfg::base::{find, find_opt, table};
 use crate::tomlcfg::options::{parse_togglable_bool, parse_size, parse_units, to_u8_opt, to_u8, parse_splitopt, parse_directional, parse_sibling, parse_hierarchy, parse_layoutopt, parse_layoutcyclesingle, parse_layoutcyclemulti, collect_bindsym_args};
 use crate::{one_of, as_type, as_type_opt, one_of_type};
 use crate::sway::commands::{Runtime, SubFocus, SubLayout};
+use crate::sway::options::LayoutCycleMulti;
 use toml::{Table, Value};
 
 // Parse a runtime command from a TOML table.
@@ -113,7 +114,12 @@ fn parse_layout(value: &Value) -> ParseResult<Runtime> {
             Ok(Runtime::Layout(SubLayout::Cycle(arg)))
         }
         fn parse_lcm(value: &Vec<Value>) -> ParseResult<Runtime> {
-            let args = value.iter().map(|m| parse_layoutcyclemulti(as_type!(m, Value::String)?)?).collect();
+            let args = value.iter()
+                .map(|m| as_type!(m, Value::String))
+                .collect::<ParseResult<Vec<&String>>>()?
+                .iter().cloned()
+                .map(parse_layoutcyclemulti)
+                .collect::<ParseResult<Vec<LayoutCycleMulti>>>()?;
             Ok(Runtime::Layout(SubLayout::CycleList(args)))
         }
         one_of_type!(value,
