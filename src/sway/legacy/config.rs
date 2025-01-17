@@ -14,7 +14,7 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.z
 
-use crate::sway::commands::Config;
+use crate::sway::legacy::commands::Config;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::fs::File;
 use std::io::{Write, Result};
@@ -133,8 +133,8 @@ impl WritableConfig for ConfigGroup {
 
 #[cfg(test)]
 mod tests {
-    use crate::sway::commands::{Config, Runtime, SubMove};
-    use crate::sway::options::Directional;
+    use crate::sway::legacy::commands::{Config, Runtime, SubMove};
+    use crate::sway::legacy::options::Directional;
     use super::*;
 
     #[test]

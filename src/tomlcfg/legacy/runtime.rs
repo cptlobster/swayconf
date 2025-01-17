@@ -22,8 +22,8 @@ use crate::tomlcfg::legacy::options::{parse_togglable_bool, parse_size, parse_un
                                       parse_layoutcyclesingle, parse_layoutcyclemulti,
                                       collect_bindsym_args};
 use crate::{one_of, as_type, as_type_opt, one_of_type};
-use crate::sway::commands::{Runtime, SubFocus, SubLayout, SubMove};
-use crate::sway::options::{FocusSibling, LayoutCycleMulti, RelWorkspace, Units};
+use crate::sway::legacy::commands::{Runtime, SubFocus, SubLayout, SubMove};
+use crate::sway::legacy::options::{FocusSibling, LayoutCycleMulti, RelWorkspace, Units};
 use toml::{Table, Value};
 
 // Parse a runtime command from a TOML table.
@@ -348,8 +348,8 @@ fn parse_workspace(value: &Value) -> ParseResult<Runtime> {
 
 #[cfg(test)]
 mod tests {
-    use crate::sway::commands::SubMove;
-    use crate::sway::options::Directional;
+    use crate::sway::legacy::commands::SubMove;
+    use crate::sway::legacy::options::Directional;
     use crate::tomlcfg::legacy::base::from_str;
     use super::*;
     

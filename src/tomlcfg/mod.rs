@@ -18,9 +18,9 @@ mod mappings;
 
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
-use crate::sway::commands::{Config, Runtime};
+use crate::sway::legacy::commands::{Config, Runtime};
 use crate::tomlcfg::mappings::{BindsymPart};
-use crate::sway::options;
+use crate::sway::legacy::options;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", tag = "type")]
@@ -42,8 +42,8 @@ enum TomlCfg {
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
-    use crate::sway::commands::SubMove;
-    use crate::sway::options::Bindsym;
+    use crate::sway::legacy::commands::SubMove;
+    use crate::sway::legacy::options::Bindsym;
     use super::*;
 
     #[test]

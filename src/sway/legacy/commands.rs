@@ -14,7 +14,7 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 use subenum::subenum;
-use crate::sway::options;
+use crate::sway::legacy::options;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::path::PathBuf;
 use serde::{Serialize, Deserialize};

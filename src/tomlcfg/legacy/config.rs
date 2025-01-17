@@ -20,7 +20,7 @@ use crate::tomlcfg::legacy::{ParseResult, ParseError};
 use crate::tomlcfg::legacy::base::{find, find_opt, table};
 use crate::tomlcfg::legacy::options::{collect_bindsym_args};
 use crate::{as_type, as_type_opt};
-use crate::sway::commands::{Config};
+use crate::sway::legacy::commands::{Config};
 use toml::{Value};
 use crate::tomlcfg::legacy::runtime::parse_runtime;
 

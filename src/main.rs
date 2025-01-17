@@ -19,7 +19,7 @@ mod tomlcfg;
 use std::path::{Path, PathBuf};
 use tomlcfg::legacy::base::read;
 use tomlcfg::legacy::cfgfile::asm_config;
-use crate::sway::config::{ConfigFile, WritableConfig};
+use crate::sway::legacy::config::{ConfigFile, WritableConfig};
 use crate::tomlcfg::legacy::ParseResult;
 
 fn gen_conf(path: PathBuf) -> ParseResult<ConfigFile> {
