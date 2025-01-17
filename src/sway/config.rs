@@ -20,6 +20,7 @@ use std::fs::File;
 use std::io::{Write, Result};
 use std::path::PathBuf;
 use homedir::my_home;
+use log;
 
 pub trait WritableConfig {
     /// Write the config file contents.
@@ -58,9 +59,9 @@ impl ConfigFile {
 
 impl WritableConfig for ConfigFile {
     fn write(&self) -> Result<usize> {
-        log::debug!("Writing to file {}", self.path.display());
+        log::info!("Writing to file {}", self.path.display());
         File::create(self.path.clone())
-            .and_then(|mut f| {f.write(self.to_string().as_bytes())})
+            .and_then(|mut f| { f.write(self.to_string().as_bytes()) })
     }
 
     fn strip_comments(&self) -> ConfigFile {
@@ -78,7 +79,11 @@ impl WritableConfig for ConfigFile {
 // this will let us convert the entire config struct into a single string representation
 impl Display for ConfigFile {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.commands.iter().map(|c| c.to_string()).collect::<Vec<String>>().join("\n"))
+        log::debug!("converting config to string");
+        write!(f, "{}", self.commands.iter().map(|c| {
+            log::trace!("{:?}", c);
+            c.to_string()
+        }).collect::<Vec<String>>().join("\n"))
     }
 }
 

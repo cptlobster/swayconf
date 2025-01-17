@@ -23,7 +23,7 @@ use log;
 #[macro_export]
 macro_rules! as_type {
     ($input:expr, $t:path) => {{
-        log::debug!("Read key {} as {}", stringify!($input), stringify!($t));
+        log::trace!("Read key {} as {}", stringify!($input), stringify!($t));
         match $input {
             $t(v) => Ok(v),
             _ => Err(ParseError::IncorrectType(vec![stringify!($t).to_string()])),
@@ -34,7 +34,7 @@ macro_rules! as_type {
 #[macro_export]
 macro_rules! as_type_opt {
     ($input:expr, $t:path) => {{
-        log::debug!("Read option {} as {}", stringify!($input), stringify!($t));
+        log::trace!("Read option {} as {}", stringify!($input), stringify!($t));
         match $input {
             Some($t(v)) => Ok(Some(v)),
             None => Ok(None),
@@ -46,7 +46,7 @@ macro_rules! as_type_opt {
 #[macro_export]
 macro_rules! one_of_type {
     ($input:expr, $($t:path, $target:ident), *) => {{
-        log::debug!("Read key {} as one of {:?}", stringify!($input), vec![$(stringify!($t).to_string(),)*]);
+        log::trace!("Read key {} as one of {:?}", stringify!($input), vec![$(stringify!($t).to_string(),)*]);
         match $input {
             $($t(v) => $target(v),)*
             _ => Err(ParseError::IncorrectType(vec![$(stringify!($t).to_string(),)*])),
@@ -58,9 +58,9 @@ macro_rules! one_of_type {
 macro_rules! one_of {
     ($input:expr, $($key:literal, $target:ident), *) => {{
         let expected_keys = vec![$($key),*];
-        log::debug!("Check for keys {:?}", expected_keys);
+        log::trace!("Check for keys {:?}", expected_keys);
         let found_keys: Vec<String> = $input.keys().cloned().filter(|k| expected_keys.contains(&k.as_str())).collect();
-        log::debug!("Found matching {:?}", found_keys);
+        log::trace!("Found matching {:?}", found_keys);
         match &found_keys.len() {
             1 => match found_keys[0].as_str() {
                 $($key => $target(find($input, $key.to_string())?),)*
@@ -88,7 +88,7 @@ pub fn from_str(str: String) -> ParseResult<Table> {
 }
 
 pub fn find(table: &Table, key: String) -> ParseResult<&Value> {
-    log::debug!("Searching for {}", key);
+    log::trace!("Searching for {}", key);
     match table.get(&key) {
         Some(value) => Ok(value),
         None => Err(ParseError::KeyNotFound(key)),
@@ -96,7 +96,7 @@ pub fn find(table: &Table, key: String) -> ParseResult<&Value> {
 }
 
 pub fn find_opt(table: &Table, key: String) -> Option<&Value> {
-    log::debug!("Searching optionally for {}", key);
+    log::trace!("Searching optionally for {}", key);
     table.get(&key)
 }
 

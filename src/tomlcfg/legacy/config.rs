@@ -25,6 +25,7 @@ use toml::{Value};
 use crate::tomlcfg::legacy::runtime::parse_runtime;
 
 pub fn parse_exec(value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing exec command");
     let table = as_type!(value, Value::Table)?;
     let mut command = as_type!(find(table, "command".to_string())?, Value::String)?.clone();
     let nsid = *as_type_opt!(find_opt(table, "no-startup-id".to_string()), Value::Boolean)?.unwrap_or(&false);
@@ -34,6 +35,7 @@ pub fn parse_exec(value: &Value) -> ParseResult<Config> {
 }
 
 pub fn parse_exec_always(value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing exec-always command");
     let table = as_type!(value, Value::Table)?;
     let mut command = as_type!(find(table, "command".to_string())?, Value::String)?.clone();
     let nsid = *as_type_opt!(find_opt(table, "no-startup-id".to_string()), Value::Boolean)?.unwrap_or(&false);
@@ -43,6 +45,7 @@ pub fn parse_exec_always(value: &Value) -> ParseResult<Config> {
 }
 
 pub fn parse_bindsym_nokeys(keys: Vec<String>, value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing bindsym command");
     let t = as_type!(value, Value::Table)?;
     let command = Box::new(parse_runtime(t)?);
     let flags = collect_bindsym_args(t)?;
@@ -50,24 +53,28 @@ pub fn parse_bindsym_nokeys(keys: Vec<String>, value: &Value) -> ParseResult<Con
 }
 
 pub fn parse_bindsym(value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing bindsym keys");
     let t = as_type!(value, Value::Table)?;
     let keys = as_type!(find(t, "keys".to_string())?, Value::String)?.split("+").map(|a| a.to_string()).collect();
     parse_bindsym_nokeys(keys, value)
 }
 
 pub fn gen_set(name: String, v: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing set value");
     let value = as_type!(v, Value::String)?.clone();
 
     Ok(Config::Set { name, value })
 }
 
 pub fn parse_set(value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing set name");
     let table = as_type!(value, Value::Table)?;
     let name = as_type!(find(table, "name".to_string())?, Value::String)?.clone();
     gen_set(name, value)
 }
 
 pub fn parse_bar(value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing bar command");
     let table = as_type!(value, Value::Table)?;
     let bar_id = as_type_opt!(find_opt(table, "id".to_string()), Value::String)?.cloned().unwrap_or("".to_string());
     let subcommands = format!("status_command {}", as_type!(find(table, "status-command".to_string())?, Value::String)?.clone());
@@ -75,11 +82,13 @@ pub fn parse_bar(value: &Value) -> ParseResult<Config> {
 }
 
 pub fn parse_kill(value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing kill command");
     as_type!(value, Value::Boolean)?;
     Ok(Config::Kill)
 }
 
 pub fn parse_include(value: &Value) -> ParseResult<Config> {
+    log::debug!("Parsing include command");
     let pathstr = as_type!(value, Value::String)?;
     let path = PathBuf::from(pathstr);
     if path.extension() == Some(OsStr::new("toml")) {

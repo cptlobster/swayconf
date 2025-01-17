@@ -20,11 +20,12 @@ use crate::tomlcfg::legacy::base::{find, find_opt, table};
 use crate::as_type_opt;
 use crate::sway::commands::Config;
 use crate::tomlcfg::legacy::{ParseResult, ParseError};
-use crate::tomlcfg::legacy::config::{parse_bindsym_nokeys, parse_exec, parse_exec_always, 
+use crate::tomlcfg::legacy::config::{parse_bindsym_nokeys, parse_exec, parse_exec_always,
                                      parse_include, parse_bar, gen_set};
 use crate::sway::config::ConfigFile;
 
 fn parse_includes(table: &Table) -> ParseResult<Vec<Config>> {
+    log::debug!("Parsing includes block");
     let arr = as_type_opt!(find_opt(table, "include".to_string()), Value::Array)?;
     match arr {
         Some(a) => a.into_iter().map(parse_include).collect::<ParseResult<Vec<Config>>>(),
@@ -33,6 +34,7 @@ fn parse_includes(table: &Table) -> ParseResult<Vec<Config>> {
 }
 
 fn parse_execs(table: &Table) -> ParseResult<Vec<Config>> {
+    log::debug!("Parsing exec block");
     let arr = as_type_opt!(find_opt(table, "exec".to_string()), Value::Array)?;
     match arr {
         Some(a) => a.into_iter().map(parse_exec).collect::<ParseResult<Vec<Config>>>(),
@@ -41,6 +43,7 @@ fn parse_execs(table: &Table) -> ParseResult<Vec<Config>> {
 }
 
 fn parse_execs_always(table: &Table) -> ParseResult<Vec<Config>> {
+    log::debug!("Parsing exec-always block");
     let arr = as_type_opt!(find_opt(table, "exec-always".to_string()), Value::Array)?;
     match arr {
         Some(a) => a.into_iter().map(parse_exec_always).collect::<ParseResult<Vec<Config>>>(),
@@ -49,6 +52,7 @@ fn parse_execs_always(table: &Table) -> ParseResult<Vec<Config>> {
 }
 
 fn parse_bindsyms(t: &Table) -> ParseResult<Vec<Config>> {
+    log::debug!("Parsing bindsym block");
     let tab = table(t, "bindsym".to_string())?;
     tab.keys().map(|keystr| {
         let keys = keystr.clone().split("+").map(|a| a.to_string()).collect();
@@ -57,6 +61,7 @@ fn parse_bindsyms(t: &Table) -> ParseResult<Vec<Config>> {
 }
 
 fn parse_sets(t: &Table) -> ParseResult<Vec<Config>> {
+    log::debug!("Parsing set block");
     let tab = table(t, "set".to_string())?;
     tab.keys().map(|keystr| {
         let name = keystr.clone();
@@ -65,6 +70,7 @@ fn parse_sets(t: &Table) -> ParseResult<Vec<Config>> {
 }
 
 fn parse_bars(table: &Table) -> ParseResult<Option<Config>> {
+    log::debug!("Parsing bar block");
     match find_opt(table, "bar".to_string()) {
         Some(t) => Ok(Some(parse_bar(t)?)),
         None => Ok(None)
@@ -72,6 +78,7 @@ fn parse_bars(table: &Table) -> ParseResult<Option<Config>> {
 }
 
 pub fn asm_config(path: PathBuf, table: &Table) -> ParseResult<ConfigFile> {
+    log::info!("Assembling config file {} from parsed TOML...", path.display());
     let mut sets = parse_sets(table)?;
     let mut includes = parse_includes(table)?;
     let mut execs = parse_execs(table)?;

@@ -47,16 +47,19 @@ pub fn parse_runtime(table: &Table) -> ParseResult<Runtime> {
 }
 
 fn parse_exit(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing exit runtime command");
     as_type!(value, Value::Boolean)?;
     Ok(Runtime::Exit)
 }
 
 fn parse_floating(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing floating runtime command");
     let tb = parse_togglable_bool(value)?;
     Ok(Runtime::Floating(tb))
 }
 
 fn parse_focus(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing focus runtime command");
     fn pf_directional(value: &Value) -> ParseResult<Runtime> {
         let direction = parse_directional(as_type!(value, Value::String)?)?;
         Ok(Runtime::Focus(SubFocus::Directional(direction)))
@@ -108,6 +111,7 @@ fn parse_focus(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_layout(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing layout runtime command");
     fn parse_set(value: &Value) -> ParseResult<Runtime> {
         let layout = parse_layoutopt(as_type!(value, Value::String)?)?;
         Ok(Runtime::Layout(SubLayout::Set(layout)))
@@ -138,6 +142,7 @@ fn parse_layout(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_move(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing move runtime command");
     fn pm_directional(value: &Value) -> ParseResult<Runtime> {
         let direction = parse_directional(as_type!(value, Value::String)?)?;
         Ok(Runtime::Move(SubMove::Directional{ direction, px: None }))
@@ -254,11 +259,13 @@ fn parse_move(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_reload(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing reload runtime command");
     as_type!(value, Value::Boolean)?;
     Ok(Runtime::Reload)
 }
 
 fn parse_resize(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing resize runtime command");
     let table = as_type!(value, Value::Table)?;
     let change = parse_size(as_type!(find(table, "change".to_string())?, Value::String)?)?;
     let x = to_u8_opt(as_type_opt!(find_opt(table, "x".to_string()), Value::Integer)?);
@@ -272,11 +279,13 @@ fn parse_resize(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_split(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing split runtime command");
     let split = parse_splitopt(as_type!(value, Value::String)?)?;
     Ok(Runtime::Split(split))
 }
 
 fn parse_bindsym(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing bindsym runtime command");
     let t = as_type!(value, Value::Table)?;
     let keys = as_type!(find(t, "keys".to_string())?, Value::String)?.split("+").map(|a| a.to_string()).collect();
     let command = Box::new(parse_runtime(table(t, "command".to_string())?)?);
@@ -285,6 +294,7 @@ fn parse_bindsym(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_exec(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing exec runtime command");
     let table = as_type!(value, Value::Table)?;
     let mut command = as_type!(find(table, "command".to_string())?, Value::String)?.clone();
     let nsid = *as_type_opt!(find_opt(table, "no-startup-id".to_string()), Value::Boolean)?.unwrap_or(&false);
@@ -294,6 +304,7 @@ fn parse_exec(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_exec_always(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing exec-always runtime command");
     let table = as_type!(value, Value::Table)?;
     let mut command = as_type!(find(table, "command".to_string())?, Value::String)?.clone();
     let nsid = *as_type_opt!(find_opt(table, "no-startup-id".to_string()), Value::Boolean)?.unwrap_or(&false);
@@ -303,11 +314,13 @@ fn parse_exec_always(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_kill(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing kill runtime command");
     as_type!(value, Value::Boolean)?;
     Ok(Runtime::Kill)
 }
 
 fn parse_set(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing set runtime command");
     let table = as_type!(value, Value::Table)?;
     let name = as_type!(find(table, "name".to_string())?, Value::String)?.clone();
     let value = as_type!(find(table, "value".to_string())?, Value::String)?.clone();
@@ -316,6 +329,7 @@ fn parse_set(value: &Value) -> ParseResult<Runtime> {
 }
 
 fn parse_workspace(value: &Value) -> ParseResult<Runtime> {
+    log::debug!("Parsing workspace runtime command");
     fn parse_wsn(value: &i64) -> ParseResult<Runtime> {
         let number = to_u8(value);
         Ok(Runtime::Workspace{ number, name: None })
