@@ -16,3 +16,4 @@
 pub mod legacy;
 pub mod commands;
 pub mod options;
+pub mod config;

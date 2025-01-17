@@ -21,13 +21,26 @@ use crate::sway::options::bindsym;
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
 pub enum Runtime {
     #[strum(to_string = "exec {command}")]
-    Exec{ command: String },
+    Exec{
+        command: String
+    },
     #[strum(to_string = "exec_always {command}")]
-    ExecAlways{ command: String },
+    ExecAlways{
+        command: String
+    },
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
-    Bindsym{ flags: bindsym::BindArgs, keys: bindsym::BindKeys, command: Box<Runtime> },
+    Bindsym{ 
+        #[serde(default)]
+        flags: bindsym::BindFlags, 
+        keys: bindsym::BindKeys,
+        #[serde(flatten)]
+        command: Box<Runtime> 
+    },
     #[strum(to_string = "set ${name} {value}")]
-    Set{ name: String, value: String },
+    Set{ 
+        name: String, 
+        value: String
+    },
 }
 
 #[cfg(test)]
@@ -39,12 +52,12 @@ mod tests {
     fn test_to_sway() {
         let cmd1 = Runtime::Exec{command: "/bin/true".to_string()};
         let cmd2 = Runtime::Bindsym{
-            flags: bindsym::BindArgs::default(),
+            flags: bindsym::BindFlags::default(),
             keys: bindsym::BindKeys::from(vec!["Mod4".to_string(), "X".to_string()]),
             command: Box::new(Runtime::Exec{command: "firefox".to_string()}),
         };
         let cmd3 = Runtime::Bindsym{
-            flags: bindsym::BindArgs::from(vec![bindsym::Bindsym::ExcludeTitlebar]),
+            flags: bindsym::BindFlags::from(vec![bindsym::Bindsym::ExcludeTitlebar]),
             keys: bindsym::BindKeys::from(vec!["Mod4".to_string(), "Shift".to_string()]),
             command: Box::new(Runtime::Exec{command: "ls -la ~".to_string()}),
         };

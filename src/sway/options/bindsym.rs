@@ -80,9 +80,9 @@ impl BindKeys {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct BindArgs(Vec<Bindsym>);
+pub struct BindFlags(Vec<Bindsym>);
 
-impl Deref for BindArgs {
+impl Deref for BindFlags {
     type Target = Vec<Bindsym>;
 
     fn deref(&self) -> &Self::Target {
@@ -90,7 +90,7 @@ impl Deref for BindArgs {
     }
 }
 
-impl Display for BindArgs {
+impl Display for BindFlags {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.0
             .iter()
@@ -100,18 +100,18 @@ impl Display for BindArgs {
     }
 }
 
-impl Default for BindArgs {
+impl Default for BindFlags {
     fn default() -> Self {
         Self(Vec::new())
     }
 }
 
-impl BindArgs {
+impl BindFlags {
     pub fn new() -> Self {
-        BindArgs::default()
+        BindFlags::default()
     }
 
     pub fn from(vec: Vec<Bindsym>) -> Self {
-        BindArgs(vec)
+        BindFlags(vec)
     }
 }
