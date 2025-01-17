@@ -20,8 +20,9 @@ use std::path::PathBuf;
 use serde::{Serialize, Deserialize};
 
 /// All top-level command declarations. These are developed using the criteria specified in the `sway(5)` manpage.
-#[subenum(Config, Runtime(derive(Serialize, Deserialize), serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")))]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[subenum(Config, Runtime)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
 pub enum Commands {
     #[subenum(Config)]
     Bar{ bar_id: String, subcommands: String },
@@ -50,7 +51,7 @@ pub enum Commands {
     #[subenum(Config, Runtime)]
     Kill,
     #[subenum(Config, Runtime)]
-    Set{name: String, value: String},
+    Set{ name: String, value: String },
     #[subenum(Runtime)]
     Workspace{ number: u8, name: Option<String> },
     #[subenum(Config, Runtime)]
@@ -254,9 +255,19 @@ mod tests {
 
     #[test]
     fn serde_demo() {
-        fn print(cmd: Runtime) {
-            println!("{}", toml::to_string(&cmd).unwrap());
-        }
+        env_logger::init();
+        
+        let mut passed = true;
+        let mut print = |cmd: Runtime| {
+            println!("{:?}", cmd);
+            match toml::to_string(&cmd) {
+                Ok(s) => { println!("{}", s); }
+                Err(e) => {
+                    println!("ERROR: {}", e);
+                    passed = false;
+                }
+            }
+        };
 
         print(Runtime::Exec("sudo apt-get update && sudo apt-get upgrade".to_string()));
         print(Runtime::ExecAlways("ls -la ~/.config/sway".to_string()));
@@ -331,5 +342,7 @@ mod tests {
                 px: None
             }))
         });
+
+        assert!(passed);
     }
 }
