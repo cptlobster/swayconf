@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# configuration file parsing
+# configuration file parsing and generation
 serde = { version = "1.0.217", features = ["derive"] }
 toml = "0.8.19"
+strum = {  version = "0.26.3", features = ["derive"] }
 # subenum (used to differentiate runtime and config arguments)
 subenum = "1.1.2"
 # homedir (used for getting the user's homedir for default config file placement)

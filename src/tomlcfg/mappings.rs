@@ -15,8 +15,8 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use serde::{Serialize, Deserialize};
-use crate::sway::commands::{Runtime};
-use crate::sway::options;
+use crate::sway::legacy::commands::{Runtime};
+use crate::sway::legacy::options;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
