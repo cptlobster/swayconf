@@ -17,7 +17,8 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};
-use crate::sway::options::bind;
+use strum::Display;
+use crate::sway::options::{bind, exec};
 use crate::sway::commands::Runtime;
 
 /// Basic structure for a config file. While this structure is more defined than the Sway config
@@ -55,15 +56,18 @@ pub struct Config {
     /// Note that these will only be run once when Sway is launched; NOT when reload is called
     /// Use exec-always if you need this command run on reload
     #[serde(default)]
-    exec: Option<Vec<String>>,
+    exec: Option<Vec<Exec>>,
     /// Startup commands (exec-always)
     /// 
     /// These commands will run when Sway is launched and when reload is called
     #[serde(default)]
-    exec_always: Option<Vec<String>>,
+    exec_always: Option<Vec<Exec>>,
     /// User-defined bindsym commands
     #[serde(default)]
     bindsym: Option<HashMap<String, KeylessBindsym>>,
+    /// User-defined bindcode commands
+    #[serde(default)]
+    bindcode: Option<HashMap<String, KeylessBindsym>>,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
@@ -73,6 +77,18 @@ pub struct KeylessBindsym {
     flags: bind::BindFlags,
     #[serde(flatten)]
     command: Runtime
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Display, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case", untagged)]
+pub enum Exec {
+    #[strum(serialize = "{0}")]
+    String(String),
+    #[strum(serialize = "{args}{command}")]
+    Flagged {
+        args: exec::ExecFlags,
+        command: String
+    }
 }
 
 impl KeylessBindsym {
@@ -118,7 +134,24 @@ fn stringify_bindsyms(bindsym: &Option<HashMap<String, KeylessBindsym>>) -> Stri
     }
 }
 
-fn stringify_exec(exec: &Option<Vec<String>>) -> String {
+fn stringify_bindcodes(bindcode: &Option<HashMap<String, KeylessBindsym>>) -> String {
+    match bindcode {
+        Some(s) => {
+            if s.is_empty() {String::new()}
+            else {
+                with_comment_header(
+                    s.iter().map(|(k, KeylessBindsym{flags, command})|
+                        format!("bindcode {flags}{k} {command}")
+                    ).collect::<Vec<String>>().join("\n"),
+                    "User-defined bindcode commands (using [bindcode] table)".to_string()
+                )
+            }
+        }
+        None => String::new()
+    }
+}
+
+fn stringify_exec(exec: &Option<Vec<Exec>>) -> String {
     match exec {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -135,7 +168,7 @@ fn stringify_exec(exec: &Option<Vec<String>>) -> String {
     }
 }
 
-fn stringify_exec_always(exec_always: &Option<Vec<String>>) -> String {
+fn stringify_exec_always(exec_always: &Option<Vec<Exec>>) -> String {
     match exec_always {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -158,12 +191,14 @@ impl Display for Config {
             \nwill need to run `sway -c [config file] -C` to do so.\
             \n\
             \nFor more information, please visit https://github.com/cptlobster/swayconf.";
-        write!(f, "{}{}{}{}{}",
+        write!(f, "{}{}{}{}{}{}",
                with_comment_header(String::new(), header.to_string()),
                stringify_sets(&self.set),
                stringify_exec(&self.exec),
                stringify_exec_always(&self.exec_always),
-               stringify_bindsyms(&self.bindsym))
+               stringify_bindsyms(&self.bindsym),
+               stringify_bindcodes(&self.bindcode)
+        )
     }
 }
 
@@ -176,8 +211,8 @@ mod tests {
         let mut config = Config::default();
         config.exec = Some(
             vec![
-                "ls".to_string(),
-                "/bin/bash".to_string(),
+                Exec::String("ls".to_string()),
+                Exec::String("/bin/bash".to_string()),
             ]
         );
 

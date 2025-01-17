@@ -36,6 +36,14 @@ pub enum Runtime {
         #[serde(flatten)]
         command: Box<Runtime> 
     },
+    #[strum(to_string = "bindsym {flags}{keys} {command}")]
+    BindCode{
+        #[serde(default)]
+        flags: bind::BindFlags,
+        keys: bind::BindCodes,
+        #[serde(flatten)]
+        command: Box<Runtime>
+    },
     #[strum(to_string = "set ${name} {value}")]
     Set{ 
         name: String, 
@@ -67,11 +75,5 @@ mod tests {
         assert_eq!(cmd4.to_string(), "set $foo bar");
         assert_eq!(cmd2.to_string(), "bindsym Mod4+X exec firefox");
         assert_eq!(cmd3.to_string(), "bindsym --exclude-titlebar Mod4+Shift exec ls -la ~");
-    }
-    
-    fn test_serde() {
-        // println!("{}", toml::to_string(&cmd1).unwrap());
-        // println!("{}", toml::to_string(&cmd2).unwrap());
-        // println!("{}", toml::to_string(&cmd3).unwrap());
     }
 }

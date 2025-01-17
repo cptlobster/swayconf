@@ -78,6 +78,41 @@ impl BindKeys {
     }
 }
 
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct BindCodes(Vec<u8>);
+
+impl Deref for BindCodes {
+    type Target = Vec<u8>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Display for BindCodes {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "{}", self.0.iter().map(|a|a.to_string()).collect::<Vec<String>>().join("+"))
+    }
+}
+
+impl Default for BindCodes {
+    fn default() -> Self {
+        BindCodes(Vec::new())
+    }
+}
+
+impl BindCodes {
+    pub fn new() -> Self {
+        BindCodes::default()
+    }
+
+    pub fn from(vec: Vec<u8>) -> Self {
+        BindCodes(vec)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct BindFlags(Vec<Bind>);
