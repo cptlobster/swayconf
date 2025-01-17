@@ -14,28 +14,29 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 pub mod legacy;
+mod mappings;
 
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 use crate::sway::commands::{Config, Runtime};
+use crate::tomlcfg::mappings::{BindsymPart};
 use crate::sway::options;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-struct TomlCfg {
-    set: Option<HashMap<String, String>>,
-    include: Option<Vec<Config>>,
-    exec: Option<Vec<Config>>,
-    exec_always: Option<Vec<Config>>,
-    bindsym: Option<HashMap<String, BindsymPart>>,
-    bar: Option<Config>
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-struct BindsymPart {
-    args: Vec<options::Bindsym>,
-    command: Box<Runtime>,
+#[serde(rename_all = "kebab-case", tag = "type")]
+enum TomlCfg {
+    SingleFile {
+        set: Option<HashMap<String, String>>,
+        include: Option<Vec<Config>>,
+        exec: Option<Vec<Config>>,
+        exec_always: Option<Vec<Config>>,
+        bindsym: Option<HashMap<String, BindsymPart>>,
+        bar: Option<Config>
+    },
+    Tree {
+        path: String,
+        contents: Vec<TomlCfg>
+    }
 }
 
 #[cfg(test)]
@@ -72,18 +73,18 @@ mod tests {
         exec.push(Config::Exec("systemctl start docker.service".to_string()));
 
         let mut bindsym = HashMap::new();
-        bindsym.insert(String::from("Mod4+A"), BindsymPart {
-            args: vec![],
-            command: Box::new(Runtime::Move(SubMove::ToWorkspace(options::RelWorkspace::Prev)))
-        });
-        bindsym.insert(String::from("Mod4+Shift+R"), BindsymPart {
-            args: vec![Bindsym::Release],
-            command: Box::new(Runtime::Reload)
-        });
+        bindsym.insert(String::from("Mod4+A"), BindsymPart(
+            vec![],
+            Runtime::Move(SubMove::ToWorkspace(options::RelWorkspace::Prev))
+        ));
+        bindsym.insert(String::from("Mod4+Shift+R"), BindsymPart(
+            vec![Bindsym::Release],
+            Runtime::Reload
+        ));
 
-        let bar = Config::Bar{ bar_id: "".to_string(), subcommands: "i3blocks".to_string() };
+        let bar = Config::Bar{ bar_id: "".to_string(), subcommands: "status_command i3blocks".to_string() };
 
-        let tcfg = TomlCfg{
+        let tcfg = TomlCfg::SingleFile {
             set: Some(set),
             include: Some(include),
             exec: Some(exec),
