@@ -17,8 +17,8 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Deserialize, Serialize};
 use subenum::subenum;
-use crate::sway::options::ContainerType::Container;
-use crate::sway::options::Size::Grow;
+use crate::sway::legacy::options::ContainerType::Container;
+use crate::sway::legacy::options::Size::Grow;
 
 /// Possible options for resize commands.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
