@@ -21,7 +21,7 @@ use strum::Display;
 
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub enum Bindsym {
+pub enum Bind {
     #[strum(to_string = "--whole-window")]
     WholeWindow,
     #[strum(to_string = "--border")]
@@ -80,10 +80,10 @@ impl BindKeys {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct BindFlags(Vec<Bindsym>);
+pub struct BindFlags(Vec<Bind>);
 
 impl Deref for BindFlags {
-    type Target = Vec<Bindsym>;
+    type Target = Vec<Bind>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -111,7 +111,7 @@ impl BindFlags {
         BindFlags::default()
     }
 
-    pub fn from(vec: Vec<Bindsym>) -> Self {
+    pub fn from(vec: Vec<Bind>) -> Self {
         BindFlags(vec)
     }
 }

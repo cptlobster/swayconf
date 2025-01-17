@@ -15,7 +15,7 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 use serde::{Deserialize, Serialize};
 use strum::Display;
-use crate::sway::options::bindsym;
+use crate::sway::options::bind;
 
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
@@ -31,8 +31,8 @@ pub enum Runtime {
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
     Bindsym{ 
         #[serde(default)]
-        flags: bindsym::BindFlags, 
-        keys: bindsym::BindKeys,
+        flags: bind::BindFlags, 
+        keys: bind::BindKeys,
         #[serde(flatten)]
         command: Box<Runtime> 
     },
@@ -45,20 +45,20 @@ pub enum Runtime {
 
 #[cfg(test)]
 mod tests {
-    use crate::sway::options::bindsym;
+    use crate::sway::options::bind;
     use super::*;
     
     #[test]
     fn test_to_sway() {
         let cmd1 = Runtime::Exec{command: "/bin/true".to_string()};
         let cmd2 = Runtime::Bindsym{
-            flags: bindsym::BindFlags::default(),
-            keys: bindsym::BindKeys::from(vec!["Mod4".to_string(), "X".to_string()]),
+            flags: bind::BindFlags::default(),
+            keys: bind::BindKeys::from(vec!["Mod4".to_string(), "X".to_string()]),
             command: Box::new(Runtime::Exec{command: "firefox".to_string()}),
         };
         let cmd3 = Runtime::Bindsym{
-            flags: bindsym::BindFlags::from(vec![bindsym::Bindsym::ExcludeTitlebar]),
-            keys: bindsym::BindKeys::from(vec!["Mod4".to_string(), "Shift".to_string()]),
+            flags: bind::BindFlags::from(vec![bind::Bind::ExcludeTitlebar]),
+            keys: bind::BindKeys::from(vec!["Mod4".to_string(), "Shift".to_string()]),
             command: Box::new(Runtime::Exec{command: "ls -la ~".to_string()}),
         };
         let cmd4 = Runtime::Set{name: "foo".to_string(), value: "bar".to_string()};

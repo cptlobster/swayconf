@@ -17,18 +17,51 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};
-use crate::sway::options::bindsym;
+use crate::sway::options::bind;
 use crate::sway::commands::Runtime;
 
+/// Basic structure for a config file. While this structure is more defined than the Sway config
+/// file normally allows, this provides simple compatibility with Serde and allows for formatting
+/// your configs in TOML.
+/// 
+/// ## Example
+/// This TOML config:
+/// ```toml
+/// exec = ["ls", "/bin/bash"]
+/// 
+/// [set]
+/// mod = "Mod4"
+/// 
+/// [bindsym]
+/// "$mod+Shift".exec.command = "ls -la"
+/// "$mod+X".exec.command = "~/beans.sh"
+/// ```
+/// will render as the following Sway config (there will be slightly more comments):
+/// ```text
+/// set $mod Mod4
+/// exec ls
+/// exec /bin/bash
+/// bindsym $mod+Shift exec ls -la
+/// bindsym $mod+X exec ~/beans.sh
+/// ```
 #[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Config {
+    /// Set Sway config variables.
     #[serde(default)]
     set: Option<HashMap<String, String>>,
+    /// Startup commands (exec)
+    /// 
+    /// Note that these will only be run once when Sway is launched; NOT when reload is called
+    /// Use exec-always if you need this command run on reload
     #[serde(default)]
     exec: Option<Vec<String>>,
+    /// Startup commands (exec-always)
+    /// 
+    /// These commands will run when Sway is launched and when reload is called
     #[serde(default)]
     exec_always: Option<Vec<String>>,
+    /// User-defined bindsym commands
     #[serde(default)]
     bindsym: Option<HashMap<String, KeylessBindsym>>,
 }
@@ -37,13 +70,13 @@ pub struct Config {
 #[serde(rename_all = "kebab-case")]
 pub struct KeylessBindsym {
     #[serde(default)]
-    flags: bindsym::BindFlags,
+    flags: bind::BindFlags,
     #[serde(flatten)]
     command: Runtime
 }
 
 impl KeylessBindsym {
-    pub fn new(flags: bindsym::BindFlags, command: Runtime) -> Self {
+    pub fn new(flags: bind::BindFlags, command: Runtime) -> Self {
         Self { flags, command }
     }
 }
@@ -149,8 +182,8 @@ mod tests {
         );
 
         let mut keys = HashMap::new();
-        keys.insert("Mod4+Shift".to_string(), KeylessBindsym::new(bindsym::BindFlags::default(), Runtime::Exec { command: "ls -la ~".to_string() }));
-        keys.insert("Mod4+X".to_string(), KeylessBindsym::new(bindsym::BindFlags::default(), Runtime::Exec { command: "~/beans.sh".to_string() }));
+        keys.insert("Mod4+Shift".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec { command: "ls -la ~".to_string() }));
+        keys.insert("Mod4+X".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec { command: "~/beans.sh".to_string() }));
 
         config.bindsym = Some(keys);
 
