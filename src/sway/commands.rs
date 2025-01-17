@@ -20,7 +20,7 @@ use std::path::PathBuf;
 use serde::{Serialize, Deserialize};
 
 /// All top-level command declarations. These are developed using the criteria specified in the `sway(5)` manpage.
-#[subenum(Config, Runtime(derive(Serialize, Deserialize)))]
+#[subenum(Config, Runtime(derive(Serialize, Deserialize), serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Commands {
     #[subenum(Config)]
@@ -65,6 +65,7 @@ pub enum Commands {
 
 /// Subcommands for focus.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum SubFocus {
     Directional(options::Directional),
     Sibling(options::FocusSibling),
@@ -75,6 +76,7 @@ pub enum SubFocus {
 
 /// Subcommands for layout.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum SubLayout {
     Set(options::Layout),
     Cycle(options::LayoutCycleSingle),
@@ -83,6 +85,7 @@ pub enum SubLayout {
 
 /// Subcommands for move.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
 pub enum SubMove {
     Directional{direction: options::Directional, px: Option<u8>},
     Coordinates{x: i8, y: i8, x_unit: options::Units, y_unit: options::Units, absolute: bool},
@@ -249,4 +252,84 @@ mod tests {
         assert_eq!(comment.to_string(), res_comment);
     }
 
+    #[test]
+    fn serde_demo() {
+        fn print(cmd: Runtime) {
+            println!("{}", toml::to_string(&cmd).unwrap());
+        }
+
+        print(Runtime::Exec("sudo apt-get update && sudo apt-get upgrade".to_string()));
+        print(Runtime::ExecAlways("ls -la ~/.config/sway".to_string()));
+        print(Runtime::Focus(SubFocus::Directional(options::Directional::Up)));
+        print(Runtime::Focus(SubFocus::Hierarchy(options::Hierarchy::Child)));
+        print(Runtime::Focus(SubFocus::Sibling(options::FocusSibling::Prev)));
+        print(Runtime::Focus(SubFocus::OutputNamed("jeff".to_string())));
+        print(Runtime::Focus(SubFocus::OutputDirectional(options::Directional::Left)));
+        print(Runtime::Floating(options::TogglableBool::Disable));
+        print(Runtime::Floating(options::TogglableBool::Toggle));
+        print(Runtime::Layout(SubLayout::Set(options::Layout::Tabbed)));
+        print(Runtime::Layout(SubLayout::Cycle(options::LayoutCycleSingle::All)));
+        print(Runtime::Layout(SubLayout::CycleList(vec![
+            options::LayoutCycleMulti::Tabbed,
+            options::LayoutCycleMulti::SplitH,
+            options::LayoutCycleMulti::SplitV
+        ])));
+        print(Runtime::Move(SubMove::Directional {
+            direction: options::Directional::Up,
+            px: None
+        }));
+        print(Runtime::Move(SubMove::Directional {
+            direction: options::Directional::Up,
+            px: Some(10)
+        }));
+        print(Runtime::Move(SubMove::Coordinates {
+            x: 10,
+            y: 20,
+            x_unit: options::Units::Px,
+            y_unit: options::Units::Ppt,
+            absolute: false,
+        }));
+        print(Runtime::Move(SubMove::Center { absolute: true }));
+        print(Runtime::Move(SubMove::ToCursor));
+        print(Runtime::Move(SubMove::BackAndForth));
+        print(Runtime::Move(SubMove::ToWorkspace(options::RelWorkspace::Prev)));
+        print(Runtime::Move(SubMove::ToWorkspaceNamed(12, Some("pablo".to_string()))));
+        print(Runtime::Move(SubMove::ToWorkspaceOnOutput(options::FocusSibling::Prev)));
+        print(Runtime::Move(SubMove::ToDirectionalOutput(options::Directional::Left)));
+        print(Runtime::Move(SubMove::ToNamedOutput("meowsicles".to_string())));
+        print(Runtime::Split(options::Split::None));
+        // MOVE FAILING COMMANDS PAST THIS LINE
+        print(Runtime::Workspace { number: 3, name: None });
+        print(Runtime::Workspace { number: 7, name: Some("pickle rick".to_string())});
+        print(Runtime::Set{ name: "works".to_string(), value: "false".to_string() });
+        print(Runtime::Resize {
+            change: options::Size::Shrink,
+            x: None,
+            y: Some(39),
+            unit: options::Units::Ppt
+        });
+        print(Runtime::Resize {
+            change: options::Size::Grow,
+            x: Some(10),
+            y: None,
+            unit: options::Units::Px
+        });
+        print(Runtime::Reload);
+        print(Runtime::Move(SubMove::ToWorkspaceNamed(3, None)));
+        print(Runtime::Kill);
+        print(Runtime::Exit);
+        print(Runtime::Bindsym {
+            flags: vec![],
+            keys: vec!["Mod4".to_string(), "X".to_string()],
+            command: Box::new(Runtime::Exec("/bin/bash".to_string()))
+        });
+        print(Runtime::Bindsym {
+            flags: vec![],
+            keys: vec!["Mod4".to_string(), "V".to_string()],
+            command: Box::new(Runtime::Move(SubMove::Directional {
+                direction: options::Directional::Up,
+                px: None
+            }))
+        });
+    }
 }

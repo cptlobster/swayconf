@@ -22,6 +22,7 @@ use crate::sway::options::Size::Grow;
 
 /// Possible options for resize commands.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Size {
     Shrink,
     Grow,
@@ -29,6 +30,7 @@ pub enum Size {
 
 /// Possible options for container types.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum ContainerType {
     Container,
     Window,
@@ -36,6 +38,7 @@ pub enum ContainerType {
 
 /// Possible options for units.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Units {
     Px,
     Ppt,
@@ -43,6 +46,7 @@ pub enum Units {
 
 /// Possible options for parent/child hierarchy commands.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Hierarchy {
     Parent,
     Child,
@@ -50,6 +54,7 @@ pub enum Hierarchy {
 
 /// Possible options for sibling hierarchy commands.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum FocusSibling {
     Prev,
     Next,
@@ -57,6 +62,7 @@ pub enum FocusSibling {
 
 /// Possible options for relative workspaces.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum RelWorkspace {
     Prev,
     Next,
@@ -65,6 +71,7 @@ pub enum RelWorkspace {
 
 /// Possible directional arguments.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Directional {
     Up,
     Down,
@@ -74,6 +81,7 @@ pub enum Directional {
 
 /// "Togglable boolean"; Has true/false value, but also "toggle" which will switch from true to false and vice versa.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum TogglableBool {
     Enable,
     Disable,
@@ -82,6 +90,7 @@ pub enum TogglableBool {
 
 /// Possible layout options.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Layout {
     Default,
     Stacking,
@@ -93,6 +102,7 @@ pub enum Layout {
 /// Possibly options for cycling layouts.
 #[subenum(LayoutCycleSingle, LayoutCycleMulti)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum LayoutCycle {
     #[subenum(LayoutCycleMulti)]
     Stacking,
@@ -110,6 +120,7 @@ pub enum LayoutCycle {
 
 /// Possible split options.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Split {
     Horizontal,
     Vertical,
@@ -118,6 +129,7 @@ pub enum Split {
 
 /// Possible flags for bindsym commands.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Bindsym {
     WholeWindow,
     Border,
