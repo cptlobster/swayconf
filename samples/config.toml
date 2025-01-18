@@ -5,7 +5,7 @@ version = "0.1"
 # To add commands to be executed on config reloads too, create an exec_always entry)
 exec = [
     { command = "dex --autostart --environment sway", no-startup-id = true },
-    { command = "swayidle -w timeout 300 $lock_sh before-sleep $lock_sh" },
+    "swayidle -w timeout 300 $lock_sh before-sleep $lock_sh",
     { command = "nm-applet --sm-disable", no-startup-id = true },
     { command = "blueman-applet", no-startup-id = true },
     { command = "mako", no-startup-id = true },
@@ -54,17 +54,17 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 
 [bindsym]
 # Shortcuts (this will not work unless support for rofi-i3-shortcut-help is added)
-"$mod+Shift+slash".exec.command = "rofi -modi shortcut:~/.rofi-i3-shortcuts/shortcut.sh -show shortcut"
+"$mod+Shift+slash".exec = "rofi -modi shortcut:~/.rofi-i3-shortcuts/shortcut.sh -show shortcut"
 # kill currently focused window
-"$mod+Shift+Q".kill = true
+"$mod+Shift+Q" = "kill"
 # launch applications
-"$mod+Return".exec.command = "alacritty"
-"$mod+Shift+space".exec.command = "rofi -combi-modi window,drun,ssh -show combi"
-"Mod4+Control+Mod1+Shift+l".exec.command = "xdg-open https://www.linkedin.com"
+"$mod+Return".exec = "alacritty"
+"$mod+Shift+space".exec = "rofi -combi-modi window,drun,ssh -show combi"
+"Mod4+Control+Mod1+Shift+l".exec = "xdg-open https://www.linkedin.com"
 # Screenshots
-"$mod+Control+s".exec.command = "gscreenshot"
-"$mod+Shift+s".exec.command = "gscreenshot -s -c -n"
-"$mod+Mod1+s".exec.command = "gscreenshot -c -n"
+"$mod+Control+s".exec = "gscreenshot"
+"$mod+Shift+s".exec = "gscreenshot -s -c -n"
+"$mod+Mod1+s".exec = "gscreenshot -c -n"
 # focus windows
 "$mod+Up".focus.directional = "up"
 "$mod+Down".focus.directional = "down"
@@ -124,7 +124,7 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 #"$mod+Shift+r".restart = true
 # power options
 "$mod+l".exec = { command = "$lock_sh", no-startup-id = true }
-"$mod+Shift+e".exec.command = "rofi -show p -modi p:rofi-power-menu"
+"$mod+Shift+e".exec = "rofi -show p -modi p:rofi-power-menu"
 
 # resize mode bindsyms
 [modes.resize.bindsym]
