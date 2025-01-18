@@ -68,6 +68,8 @@ pub struct Config {
     /// User-defined bindcode commands
     #[serde(default)]
     bindcode: Option<HashMap<String, KeylessBindsym>>,
+    #[serde(default)]
+    bar: Option<Bar>,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
@@ -77,6 +79,12 @@ pub struct KeylessBindsym {
     flags: bind::BindFlags,
     #[serde(flatten)]
     command: Runtime
+}
+
+impl KeylessBindsym {
+    pub fn new(flags: bind::BindFlags, command: Runtime) -> Self {
+        Self { flags, command }
+    }
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Display, Serialize, Deserialize)]
@@ -91,9 +99,26 @@ pub enum Exec {
     }
 }
 
-impl KeylessBindsym {
-    pub fn new(flags: bind::BindFlags, command: Runtime) -> Self {
-        Self { flags, command }
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct Bar {
+    #[serde(default)]
+    id: String,
+    status_command: String
+}
+
+impl Display for Bar {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        match self.id.as_str() {
+            "" => write!(f, "bar {{\n    status_command {}}}", self.status_command),
+            _ => write!(f, "bar {} {{\n    status_command {}\n}}", self.id, self.status_command)
+        }
+    }
+}
+
+impl Bar {
+    fn new(id: String, status_command: String) -> Self {
+        Bar{ id, status_command }
     }
 }
 
@@ -183,6 +208,13 @@ fn stringify_exec_always(exec_always: &Option<Vec<Exec>>) -> String {
     }
 }
 
+fn stringify_bar (bar: &Option<Bar>) -> String {
+    match bar {
+        Some(b) => with_comment_header(b.to_string(), "Swaybar configuration".to_string()),
+        None => String::new()
+    }
+}
+
 impl Display for Config {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let header =
@@ -191,13 +223,14 @@ impl Display for Config {
             \nwill need to run `sway -c [config file] -C` to do so.\
             \n\
             \nFor more information, please visit https://github.com/cptlobster/swayconf.";
-        write!(f, "{}{}{}{}{}{}",
+        write!(f, "{}{}{}{}{}{}{}",
                with_comment_header(String::new(), header.to_string()),
                stringify_sets(&self.set),
                stringify_exec(&self.exec),
                stringify_exec_always(&self.exec_always),
                stringify_bindsyms(&self.bindsym),
-               stringify_bindcodes(&self.bindcode)
+               stringify_bindcodes(&self.bindcode),
+               stringify_bar(&Some(Bar{ id: "".to_string(), status_command: "i3blocks".to_string() }))
         )
     }
 }
