@@ -20,9 +20,11 @@ use crate::sway::options::{bind, exec};
 use crate::sway::options::exec::ExecParams;
 use crate::sway::runtime::Runtime;
 
-/// Basic structure for a config file. While this structure is more defined than the Sway config
-/// file normally allows, this provides simple compatibility with Serde and allows for formatting
-/// your configs in TOML.
+/// Basic structure for a config file.
+/// 
+/// By default, Sway allows for configuration commands to be input in arbitrary order. While this
+/// structure has a much more rigid arrangement than Sway normally allows, this provides much
+/// simpler compatibility with Serde and allows for formatting your configs in TOML.
 /// 
 /// ## Example
 /// This TOML config:

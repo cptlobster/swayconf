@@ -45,6 +45,7 @@ pub enum Runtime {
     #[strum(to_string = "floating {0}")]
     Floating(options::TogglableBool),
     Nop,
+    Reload,
     #[strum(to_string = "split {0}")]
     Split(options::Split),
     #[strum(to_string = "set ${name} {value}")]
