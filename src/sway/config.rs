@@ -16,8 +16,8 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};
-use strum::Display;
 use crate::sway::options::{bind, exec};
+use crate::sway::options::exec::ExecParams;
 use crate::sway::runtime::Runtime;
 
 /// Basic structure for a config file. While this structure is more defined than the Sway config
@@ -55,12 +55,12 @@ pub struct Config {
     /// Note that these will only be run once when Sway is launched; NOT when reload is called
     /// Use exec-always if you need this command run on reload
     #[serde(default)]
-    exec: Option<Vec<Exec>>,
+    exec: Option<Vec<exec::ExecParams>>,
     /// Startup commands (exec-always)
     /// 
     /// These commands will run when Sway is launched and when reload is called
     #[serde(default)]
-    exec_always: Option<Vec<Exec>>,
+    exec_always: Option<Vec<exec::ExecParams>>,
     /// User-defined bindsym commands
     #[serde(default)]
     bindsym: Option<HashMap<String, KeylessBindsym>>,
@@ -83,18 +83,6 @@ pub struct KeylessBindsym {
 impl KeylessBindsym {
     pub fn new(flags: bind::BindFlags, command: Runtime) -> Self {
         Self { flags, command }
-    }
-}
-
-#[derive(PartialEq, Eq, Clone, Debug, Display, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case", untagged)]
-pub enum Exec {
-    #[strum(serialize = "{0}")]
-    String(String),
-    #[strum(serialize = "{args}{command}")]
-    Flagged {
-        args: exec::ExecFlags,
-        command: String
     }
 }
 
@@ -175,7 +163,7 @@ fn stringify_bindcodes(bindcode: &Option<HashMap<String, KeylessBindsym>>) -> St
     }
 }
 
-fn stringify_exec(exec: &Option<Vec<Exec>>) -> String {
+fn stringify_exec(exec: &Option<Vec<ExecParams>>) -> String {
     match exec {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -192,7 +180,7 @@ fn stringify_exec(exec: &Option<Vec<Exec>>) -> String {
     }
 }
 
-fn stringify_exec_always(exec_always: &Option<Vec<Exec>>) -> String {
+fn stringify_exec_always(exec_always: &Option<Vec<ExecParams>>) -> String {
     match exec_always {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -243,14 +231,14 @@ mod tests {
         let mut config = Config::default();
         config.exec = Some(
             vec![
-                Exec::String("ls".to_string()),
-                Exec::String("/bin/bash".to_string()),
+                ExecParams::String("ls".to_string()),
+                ExecParams::String("/bin/bash".to_string()),
             ]
         );
 
         let mut keys = HashMap::new();
-        keys.insert("Mod4+Shift".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec { command: "ls -la ~".to_string() }));
-        keys.insert("Mod4+X".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec { command: "~/beans.sh".to_string() }));
+        keys.insert("Mod4+Shift".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec(ExecParams::String("ls -la ~".to_string()))));
+        keys.insert("Mod4+X".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec(ExecParams::String("~/beans.sh".to_string()))));
 
         config.bindsym = Some(keys);
         
