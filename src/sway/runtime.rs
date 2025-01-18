@@ -1,4 +1,3 @@
-/// Runtime command enumeration
 //     Copyright (C) 2024  Dustin Thomas <io@cptlobster.dev>
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -15,27 +14,13 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 use serde::{Deserialize, Serialize};
 use strum::Display;
+use crate::sway::options;
 use crate::sway::options::bind;
 
+/// Runtime commands for Sway.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
 pub enum Runtime {
-    #[strum(to_string = "exec {command}")]
-    Exec{
-        command: String
-    },
-    #[strum(to_string = "exec_always {command}")]
-    ExecAlways{
-        command: String
-    },
-    #[strum(to_string = "bindsym {flags}{keys} {command}")]
-    Bindsym{ 
-        #[serde(default)]
-        flags: bind::BindFlags, 
-        keys: bind::BindKeys,
-        #[serde(flatten)]
-        command: Box<Runtime> 
-    },
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
     BindCode{
         #[serde(default)]
@@ -44,11 +29,35 @@ pub enum Runtime {
         #[serde(flatten)]
         command: Box<Runtime>
     },
+    #[strum(to_string = "bindsym {flags}{keys} {command}")]
+    BindSym {
+        #[serde(default)]
+        flags: bind::BindFlags,
+        keys: bind::BindKeys,
+        #[serde(flatten)]
+        command: Box<Runtime>
+    },
+    #[strum(to_string = "exec {command}")]
+    Exec{
+        command: String
+    },
+    #[strum(to_string = "exec_always {command}")]
+    ExecAlways{
+        command: String
+    },
+    Exit,
+    #[strum(to_string = "floating {0}")]
+    Floating(options::TogglableBool),
+    Nop,
+    #[strum(to_string = "split {0}")]
+    Split(options::Split),
     #[strum(to_string = "set ${name} {value}")]
     Set{ 
-        name: String, 
+        name: String,
         value: String
     },
+    #[strum(to_string = "workspace {0}")]
+    Workspace(options::Workspace),
 }
 
 #[cfg(test)]
@@ -59,12 +68,12 @@ mod tests {
     #[test]
     fn test_to_sway() {
         let cmd1 = Runtime::Exec{command: "/bin/true".to_string()};
-        let cmd2 = Runtime::Bindsym{
+        let cmd2 = Runtime::BindSym {
             flags: bind::BindFlags::default(),
             keys: bind::BindKeys::from(vec!["Mod4".to_string(), "X".to_string()]),
             command: Box::new(Runtime::Exec{command: "firefox".to_string()}),
         };
-        let cmd3 = Runtime::Bindsym{
+        let cmd3 = Runtime::BindSym {
             flags: bind::BindFlags::from(vec![bind::Bind::ExcludeTitlebar]),
             keys: bind::BindKeys::from(vec!["Mod4".to_string(), "Shift".to_string()]),
             command: Box::new(Runtime::Exec{command: "ls -la ~".to_string()}),

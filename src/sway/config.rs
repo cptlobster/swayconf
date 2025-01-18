@@ -1,4 +1,3 @@
-/// Config-exclusive configuration management
 //     Copyright (C) 2024  Dustin Thomas <io@cptlobster.dev>
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -19,7 +18,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};
 use strum::Display;
 use crate::sway::options::{bind, exec};
-use crate::sway::commands::Runtime;
+use crate::sway::runtime::Runtime;
 
 /// Basic structure for a config file. While this structure is more defined than the Sway config
 /// file normally allows, this provides simple compatibility with Serde and allows for formatting
@@ -110,7 +109,7 @@ pub struct Bar {
 impl Display for Bar {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self.id.as_str() {
-            "" => write!(f, "bar {{\n    status_command {}}}", self.status_command),
+            "" => write!(f, "bar {{\n    status_command {}\n}}", self.status_command),
             _ => write!(f, "bar {} {{\n    status_command {}\n}}", self.id, self.status_command)
         }
     }
@@ -230,7 +229,7 @@ impl Display for Config {
                stringify_exec_always(&self.exec_always),
                stringify_bindsyms(&self.bindsym),
                stringify_bindcodes(&self.bindcode),
-               stringify_bar(&Some(Bar{ id: "".to_string(), status_command: "i3blocks".to_string() }))
+               stringify_bar(&self.bar)
         )
     }
 }
@@ -254,6 +253,8 @@ mod tests {
         keys.insert("Mod4+X".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec { command: "~/beans.sh".to_string() }));
 
         config.bindsym = Some(keys);
+        
+        config.bar = Some(Bar{ id: "".to_string(), status_command: "i3blocks".to_string() });
 
         println!("{}", config.to_string());
     }
@@ -267,6 +268,8 @@ mod tests {
             \nmod = \"Mod4\"\
             \n[bindsym]\
             \n\"$mod+Shift\".exec.command = \"ls -la\"\
+            \n\"$mod+Space\".floating = \"toggle\"\
+            \n\"$mod+Shift+Space\".floating = false\
             \n\"$mod+X\".exec.command = \"~/beans.sh\""
         ).unwrap();
 

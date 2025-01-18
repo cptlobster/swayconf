@@ -1,4 +1,3 @@
-/// Swayconf main entrypoint.
 //     Copyright (C) 2024  Dustin Thomas <io@cptlobster.dev>
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -13,7 +12,9 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+/// Struct-based representation for Sway config files.
 mod sway;
+/// TOML config mapping
 mod tomlcfg;
 
 use std::path::{Path, PathBuf};
@@ -27,6 +28,7 @@ fn gen_conf(path: PathBuf) -> ParseResult<ConfigFile> {
     asm_config(Path::new("samples/config").to_path_buf(), &cfg)
 }
 
+/// Main entrypoint
 fn main() {
     env_logger::init();
 
