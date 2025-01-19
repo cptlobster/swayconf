@@ -19,8 +19,6 @@ use crate::sway::options;
 use crate::sway::options::{bind, exec, focus, layout, mov, ArgList};
 
 /// Runtime commands for Sway.
-/// 
-/// Full documentation on the actual effect of these commands is available in the sway(5) manpage.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
 pub enum Runtime {

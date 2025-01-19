@@ -13,9 +13,18 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 pub mod legacy;
-/// Runtime command enumeration
+/// Runtime command enumeration.
+/// 
+/// This module should ONLY contain the enum for runtime commands, all options should be handled in
+/// the [options] module.
 pub mod runtime;
-/// Command options and arguments
+/// Command options and arguments.
+/// 
+/// The module itself contains some common arguments (used by various config and runtime commands),
+/// as well as modules for specific commands that have multiple variants / hyper specific arguments.
 pub mod options;
-/// Config-exclusive configuration management
+/// Base config file generation.
+///
+/// This has a rigid structure for config-only commands, so that [serde] can assemble/disassemble
+/// TOML in a way that is even moderately comprehensible.
 pub mod config;

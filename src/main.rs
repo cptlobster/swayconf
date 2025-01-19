@@ -12,9 +12,40 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 /// Struct-based representation for Sway config files.
+///
+/// # Don't panic!
+/// This module may be a bit convoluted and hard to understand at first, but don't panic! This will
+/// make perfect sense if you **DON'T TOUCH THE ACTUAL CODE. I AM SERIOUS, DO NOT TRY TO MAKE THESE
+/// YOURSELF.** This hellscape exists so that [serde] can nicely parse everything from a TOML file,
+/// and so that [strum] can handle generating the appropriate commands. In the event that you *do*
+/// need to dive into the guts of this code, good luck.
+///
+/// # Implementing Runtime Commands
+/// In the event that you need to implement more commands, the following tips may be useful:
+/// 1. Derive/macro AS MUCH AS POSSIBLE. [serde] and [strum] are incredibly forgiving with their
+///    derived traits, and simply deriving [Serialize](serde::Serialize) and
+///    [Deserialize](serde::Deserialize) (and for enums, [Display](strum::Display)) will take you a
+///    *very* long way.
+/// 2. Keep things consistent, please. All TOML fields should be interpreted as `kebab-case` and
+///    (most) sway stuff is in `snake_case` (except for arguments, like those for `bindsym` or
+///    `exec`). [serde] and [strum] will automatically handle those configurations if you annotate
+///    properly:
+///    ```
+///    #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
+///    #[strum(serialize_all = "snake_case")]
+///    ```
+///    and then all struct and enum names can follow normal Rust conventions while everything else
+///    serializes nicely to their respective formats.
+/// 3. Make sure struct/enum variant names correspond as closely to their Sway names as possible.
+///    You can add additional representations in TOML using [serde]'s `#[serde(alias = "")]`
+///    annotation.
+/// 
+/// Full documentation on the actual effects of these commands is available in the sway(5) manpage.
 mod sway;
-/// TOML config mapping
+/// TOML config mapping (deprecated)
+// TODO: DELETE THIS MODULE
 mod tomlcfg;
 
 use std::path::{Path, PathBuf};
@@ -29,6 +60,7 @@ fn gen_conf(path: PathBuf) -> ParseResult<ConfigFile> {
 }
 
 /// Main entrypoint
+// TODO: rewrite so that it doesn't use the legacy module
 fn main() {
     env_logger::init();
 

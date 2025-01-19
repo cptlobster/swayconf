@@ -19,6 +19,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Deserialize, Serialize};
 use strum::Display;
 
+/// Flags for bindsym commands.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Bind {
@@ -44,17 +45,13 @@ pub enum Bind {
     Inhibited,
 }
 
+/// Key sequence for bindsym commands.
+/// 
+/// This exists mainly to provide [Display] support (similar to the [ArgList] struct), except
+/// instead of joining everything with spaces it joins them with `+`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct BindKeys(Vec<String>);
-
-impl Deref for BindKeys {
-    type Target = Vec<String>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
 
 impl Display for BindKeys {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -78,18 +75,13 @@ impl BindKeys {
     }
 }
 
-
+/// Key sequence for bindcode commands.
+///
+/// This exists mainly to provide [Display] support (similar to the [ArgList] struct), except
+/// instead of joining everything with spaces it joins them with `+`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct BindCodes(Vec<u8>);
-
-impl Deref for BindCodes {
-    type Target = Vec<u8>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
 
 impl Display for BindCodes {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {

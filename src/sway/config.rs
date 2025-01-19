@@ -26,7 +26,7 @@ use crate::sway::runtime::Runtime;
 /// structure has a much more rigid arrangement than Sway normally allows, this provides much
 /// simpler compatibility with Serde and allows for formatting your configs in TOML.
 /// 
-/// ## Example
+/// # Example
 /// This TOML config:
 /// ```toml
 /// exec = ["ls", "/bin/bash"]
@@ -38,7 +38,7 @@ use crate::sway::runtime::Runtime;
 /// "$mod+Shift".exec.command = "ls -la"
 /// "$mod+X".exec.command = "~/beans.sh"
 /// ```
-/// will render as the following Sway config (there will be slightly more comments):
+/// will render as the following Sway config (comments and blank lines are stripped):
 /// ```text
 /// set $mod Mod4
 /// exec ls
@@ -73,6 +73,11 @@ pub struct Config {
     bar: Option<Bar>,
 }
 
+/// Bindsym argument structure, minus the keys.
+///
+/// When assembling the config-level bindsym commands, the bind map will provide the keys / key
+/// codes. This struct provides the rest of the arguments, as well as the runtime command to
+/// execute.
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct KeylessBindsym {
@@ -88,6 +93,7 @@ impl KeylessBindsym {
     }
 }
 
+/// Arguments for generating swaybars. This may be refactored in a future update.
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Bar {

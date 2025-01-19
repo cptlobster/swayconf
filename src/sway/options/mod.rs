@@ -132,6 +132,10 @@ impl Default for Units {
     fn default() -> Self { Units::Px }
 }
 
+/// An array of values.
+///
+/// A [Vec] would normally suffice for our purposes, but this struct implements [Display],
+/// [Default], and [Serialize]/[Deserialize] traits to be compatible with everything else.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct ArgList<T: FmtDisplay>(Vec<T>);
