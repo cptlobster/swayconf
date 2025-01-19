@@ -17,6 +17,8 @@ use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
 
+/// The base level focus parameter enum. This will differentiate into one of the ~9 different
+/// variants of the `focus` command in Sway when fully assembled.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "snake_case")]
@@ -36,12 +38,14 @@ pub enum FocusParams {
     ModeToggle
 }
 
+/// Specific options for selecting focus outputs
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "snake_case")]
 pub enum FocusOutputOptions {
     #[strum(serialize = "{0}")]
     Directional(options::Directional),
+    #[serde(untagged)]
     #[strum(serialize = "{0}")]
     Named(String)
 }
