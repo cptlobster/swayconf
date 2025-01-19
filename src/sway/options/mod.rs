@@ -19,6 +19,8 @@ pub mod bind;
 pub mod exec;
 /// All structs for layout commands
 pub mod layout;
+/// All structs for focus commands
+pub mod focus;
 
 use serde::{Serialize, Deserialize};
 use serde::de::{Visitor, Error, Unexpected, Deserializer};
@@ -35,7 +37,7 @@ use strum::Display;
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Display)]
 #[serde(rename_all = "kebab-case")]
-#[strum(serialize_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
 pub enum TogglableBool {
     #[serde(alias = "true", alias = "yes")]
     Enable,
@@ -47,9 +49,11 @@ pub enum TogglableBool {
 /// Options used for the `split` command.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case")]
-#[strum(serialize_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
 pub enum Split {
+    #[serde(alias = "h")]
     Horizontal,
+    #[serde(alias = "v")]
     Vertical,
     None,
 }
@@ -57,7 +61,7 @@ pub enum Split {
 /// Different forms of workspace command options.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case", untagged)]
-#[strum(serialize_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
 pub enum Workspace {
     #[strum(serialize = "{0}")]
     Numeric(u8),
@@ -72,7 +76,7 @@ pub enum Workspace {
 /// Options for parent/child hierarchy.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case")]
-#[strum(serialize_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
 pub enum Hierarchy {
     Parent,
     Child,
@@ -81,8 +85,8 @@ pub enum Hierarchy {
 /// Options for sibling hierarchy.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case")]
-#[strum(serialize_all = "kebab-case")]
-pub enum FocusSibling {
+#[strum(serialize_all = "snake_case")]
+pub enum Relative {
     #[serde(alias = "previous")]
     Prev,
     Next,
@@ -91,8 +95,8 @@ pub enum FocusSibling {
 /// Options for relative workspace commands
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case")]
-#[strum(serialize_all = "kebab-case")]
-pub enum RelWorkspace {
+#[strum(serialize_all = "snake_case")]
+pub enum RelativeWorkspace {
     #[serde(alias = "previous")]
     Prev,
     Next,
@@ -102,7 +106,7 @@ pub enum RelWorkspace {
 /// Options for directional arguments
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case")]
-#[strum(serialize_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
 pub enum Directional {
     Up,
     Down,

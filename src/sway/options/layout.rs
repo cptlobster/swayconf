@@ -36,7 +36,7 @@ pub enum LayoutCycleParams {
     #[strum(serialize = "{0}")]
     Single(LayoutCycleSingle),
     #[strum(serialize = "{0}")]
-    Multi(Vec<LayoutCycleMulti>)
+    Multi(LayoutCycleMultiList)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]

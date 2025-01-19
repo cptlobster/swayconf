@@ -16,7 +16,7 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
-use crate::sway::options::{bind, exec, layout};
+use crate::sway::options::{bind, exec, focus, layout};
 
 /// Runtime commands for Sway.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
@@ -45,6 +45,8 @@ pub enum Runtime {
     Exit,
     #[strum(to_string = "floating {0}")]
     Floating(options::TogglableBool),
+    #[strum(to_string = "focus {0}")]
+    Focus(focus::FocusParams),
     Kill,
     #[strum(to_string = "layout {0}")]
     Layout(layout::LayoutParams),
