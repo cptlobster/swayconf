@@ -21,6 +21,8 @@ pub mod exec;
 pub mod layout;
 /// All structs for focus commands
 pub mod focus;
+/// All structs for move commands
+pub mod mov;
 
 use std::fmt::{Display as FmtDisplay, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};
@@ -115,6 +117,21 @@ pub enum Directional {
     Right,
 }
 
+/// Positional units
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
+pub enum Units {
+    #[serde(alias = "pixels", alias = "pixel")]
+    Px,
+    #[serde(alias = "percent", alias = "%", alias = "points")]
+    Ppt
+}
+
+impl Default for Units {
+    fn default() -> Self { Units::Px }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct ArgList<T: FmtDisplay>(Vec<T>);
@@ -139,7 +156,7 @@ impl<T: FmtDisplay> ArgList<T> {
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     pub fn from(vec: Vec<T>) -> Self {
         Self(vec)
     }

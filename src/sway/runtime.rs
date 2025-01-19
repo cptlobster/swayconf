@@ -16,9 +16,11 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
-use crate::sway::options::{bind, exec, focus, layout, ArgList};
+use crate::sway::options::{bind, exec, focus, layout, mov, ArgList};
 
 /// Runtime commands for Sway.
+/// 
+/// Full documentation on the actual effect of these commands is available in the sway(5) manpage.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
 pub enum Runtime {
@@ -50,6 +52,8 @@ pub enum Runtime {
     Kill,
     #[strum(to_string = "layout {0}")]
     Layout(layout::LayoutParams),
+    #[strum(to_string = "move {0}")]
+    Move(mov::MoveParams),
     Nop,
     Reload,
     #[strum(to_string = "split {0}")]
