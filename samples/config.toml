@@ -56,7 +56,7 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 # Shortcuts (this will not work unless support for rofi-i3-shortcut-help is added)
 "$mod+Shift+slash".exec = "rofi -modi shortcut:~/.rofi-i3-shortcuts/shortcut.sh -show shortcut"
 # kill currently focused window
-"$mod+Shift+Q" = "kill"
+"$mod+Shift+Q".kill = {}
 # launch applications
 "$mod+Return".exec = "alacritty"
 "$mod+Shift+space".exec = "rofi -combi-modi window,drun,ssh -show combi"
@@ -100,16 +100,16 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 "$mod+9".workspace = 9
 "$mod+0".workspace = 10
 # move containers to workspaces
-"$mod+Shift+1".move.workspace = 1
-"$mod+Shift+2".move.workspace = 2
-"$mod+Shift+3".move.workspace = 3
-"$mod+Shift+4".move.workspace = 4
-"$mod+Shift+5".move.workspace = 5
-"$mod+Shift+6".move.workspace = 6
-"$mod+Shift+7".move.workspace = 7
-"$mod+Shift+8".move.workspace = 8
-"$mod+Shift+9".move.workspace = 9
-"$mod+Shift+0".move.workspace = 10
+"$mod+Shift+1".move.container = 1
+"$mod+Shift+2".move.container = 2
+"$mod+Shift+3".move.container = 3
+"$mod+Shift+4".move.container = 4
+"$mod+Shift+5".move.container = 5
+"$mod+Shift+6".move.container = 6
+"$mod+Shift+7".move.container = 7
+"$mod+Shift+8".move.container = 8
+"$mod+Shift+9".move.container = 9
+"$mod+Shift+0".move.container = 10
 # media controls
 "XF86AudioRaiseVolume".exec = { command = "$ch_vol_sh +5% && $refresh_i3status", no-startup-id = true }
 "XF86AudioLowerVolume".exec = { command = "$ch_vol_sh -5% && $refresh_i3status", no-startup-id = true }
@@ -120,7 +120,7 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 "XF86AudioNext".exec = { command = "playerctl next", no-startup-id = true }
 "XF86AudioPrev".exec = { command = "playerctl previous", no-startup-id = true }
 # config
-"$mod+Shift+c".reload = true
+"$mod+Shift+c".reload = {}
 #"$mod+Shift+r".restart = true
 # power options
 "$mod+l".exec = { command = "$lock_sh", no-startup-id = true }

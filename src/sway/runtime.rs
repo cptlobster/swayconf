@@ -16,16 +16,28 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
-use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgList};
+use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgList, ArgMap};
 
 /// Runtime commands for Sway.
+/// 
+/// Fun little piece of lore for writing your own configs: for enum variants that do not take
+/// parameters, you have to represent them as "null" types for [serde] to not throw errors. The only
+/// way to normally do this in TOML is like so:
+/// ```toml
+/// [bindsym]
+/// "Mod4+Shift+q".kill = {}
+/// ```
+/// This would bind `Mod4+Shift+Q` to the `kill` command if `kill` was a variant of [Runtime]. We
+/// get around this by representing parameterless commands in a separate enum ([ParamlessRuntime])
+/// that are stored in an untagged variant of [Runtime].
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
 pub enum Runtime {
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
     BindCode{
-        #[serde(default)]
-        flags: ArgList<bind::Bind>,
+        #[serde(default, flatten)]
+        flags: ArgMap<bind::Bind>,
         keys: bind::BindCodes,
         #[serde(flatten)]
         command: Box<Runtime>
@@ -33,7 +45,7 @@ pub enum Runtime {
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
     BindSym {
         #[serde(default)]
-        flags: ArgList<bind::Bind>,
+        flags: ArgMap<bind::Bind>,
         keys: bind::BindKeys,
         #[serde(flatten)]
         command: Box<Runtime>

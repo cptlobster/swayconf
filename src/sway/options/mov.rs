@@ -31,9 +31,9 @@ pub enum MoveParams {
     #[strum(serialize = "absolute position {0}")]
     AbsolutePosition(AbsolutePositionParams),
     #[strum(serialize = "container to {0}")]
-    Workspace(MoveContainerParams),
+    Container(MoveContainerParams),
     #[strum(serialize = "workspace to output {0}")]
-    Output(MoveToOutputParams),
+    Workspace(MoveToOutputParams),
 }
 
 /// Move to position variants.
@@ -75,9 +75,6 @@ pub enum AbsolutePositionParams {
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "snake_case")]
 pub enum MoveContainerParams {
-    /// Move container to specified workspace
-    #[strum(serialize = "workspace {0}")]
-    Workspace(MoveContainerToWorkspaceParams),
     /// Move container to specified output
     #[strum(serialize = "output {0}")]
     Output(MoveToOutputParams),
@@ -85,7 +82,11 @@ pub enum MoveContainerParams {
     Scratchpad,
     /// Move container to mark (defined using mark command)
     #[strum(serialize = "mark {0}")]
-    Mark(String)
+    Mark(String),
+    /// Move container to specified workspace
+    #[serde(untagged)]
+    #[strum(serialize = "workspace {0}")]
+    Workspace(MoveContainerToWorkspaceParams)
 }
 
 /// Move container to workspace variants.

@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use strum::Display;
 
 /// Flags for bindsym commands.
-#[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize, Hash)]
 #[serde(rename_all = "kebab-case")]
 pub enum Bind {
     #[strum(to_string = "--whole-window")]

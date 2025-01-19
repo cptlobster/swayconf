@@ -15,7 +15,7 @@
 
 use serde::{Deserialize, Serialize};
 use strum::Display;
-use crate::sway::options::ArgList;
+use crate::sway::options::{ArgList, ArgMap};
 
 #[derive(PartialEq, Eq, Clone, Debug, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case", untagged)]
@@ -24,13 +24,13 @@ pub enum ExecParams {
     String(String),
     #[strum(serialize = "{args}{command}")]
     Flagged {
-        #[serde(default)]
-        args: ArgList<Exec>,
+        #[serde(default, flatten)]
+        args: ArgMap<Exec>,
         command: String
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize, Hash)]
 #[serde(rename_all = "kebab-case")]
 pub enum Exec {
     #[strum(serialize = "--no-startup-id")]

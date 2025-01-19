@@ -54,27 +54,27 @@ pub enum SingleAxisParams {
 #[serde(rename_all = "kebab-case", untagged)]
 #[strum(serialize_all = "snake_case")]
 pub enum ResizeSetParams{
-    #[strum(serialize = "width {width} {units}")]
+    #[strum(serialize = "width {width} {unit}")]
     Width{
         #[serde(alias = "x")]
         width: u8,
         #[serde(default)]
-        units: Units
+        unit: Units
     },
-    #[strum(serialize = "height {height} {units}")]
+    #[strum(serialize = "height {height} {unit}")]
     Height{
         #[serde(alias = "y")]
         height: u8,
         #[serde(default)]
-        units: Units
+        unit: Units
     },
-    #[strum(serialize = "width {width} {units} height {height} {units}")]
+    #[strum(serialize = "width {width} {unit} height {height} {unit}")]
     Both{
         #[serde(alias = "x")]
         width: u8,
         #[serde(alias = "y")]
         height: u8,
         #[serde(default)]
-        units: Units
+        unit: Units
     },
 }

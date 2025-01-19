@@ -48,29 +48,56 @@ mod sway;
 // TODO: DELETE THIS MODULE
 mod tomlcfg;
 
-use std::path::{Path, PathBuf};
-use tomlcfg::legacy::base::read;
-use tomlcfg::legacy::cfgfile::asm_config;
-use crate::sway::legacy::config::{ConfigFile, WritableConfig};
-use crate::tomlcfg::legacy::ParseResult;
+use std::fs;
+use std::fs::File;
+use std::io::{Error as IoError, Write};
+use toml::de::Error as TomlError;
+use std::path::{PathBuf};
+use thiserror::Error;
+use sway::config::Config;
+use derive_more::{From};
 
-fn gen_conf(path: PathBuf) -> ParseResult<ConfigFile> {
-    let cfg = read(path)?;
-    asm_config(Path::new("samples/config").to_path_buf(), &cfg)
+#[derive(Debug, Error, From)]
+enum SwayconfError {
+    #[error("I/O Error: {0}")]
+    Io(IoError),
+    #[error("Config Parse Error: {0}")]
+    Toml(TomlError),
+}
+
+fn convert(path: &PathBuf) -> Result<Config, SwayconfError> {
+    log::info!("Opening file {}", path.display());
+    let str = fs::read_to_string(path)?;
+    log::info!("Parsing configuration: {}", path.display());
+    let cfg: Config = toml::from_str(&str)?;
+    log::info!("Everything went okay, continuing");
+    Ok(cfg)
+}
+
+fn write(path: &PathBuf, cfg: Config) -> Result<usize, IoError> {
+    log::info!("Writing to file {}", path.display());
+    let mut file = File::create(path.clone())?;
+    file.write(cfg.to_string().as_bytes())
 }
 
 /// Main entrypoint
 // TODO: rewrite so that it doesn't use the legacy module
 fn main() {
     env_logger::init();
-
-    match gen_conf(PathBuf::from("./samples/config.toml")) {
-        Ok(file) => {
-            match file.write() {
-                Ok(_) => log::info!("Successfully wrote to config file"),
-                Err(e) => log::error!("Error writing config file: {}", e),
+    
+    let path = PathBuf::from("samples/config.toml");
+    match convert(&path) {
+        Ok(cfg) => {
+            log::info!("Successfully converted {:?}", &path);
+            log::trace!("{:#?}", &cfg);
+            let new_path = path.with_extension("");
+            match write(&new_path, cfg) {
+                Ok(_) => log::info!("Successfully wrote to {}", &new_path.display()),
+                Err(e) => log::error!("Error writing config: {}", e),
             }
         }
-        Err(e) => { log::error!("Error generating config: {}", e); }
-    }
+        Err(err) => {
+            log::error!("Failed to convert {}: {}", &path.display(), err);
+        }
+    };
 }

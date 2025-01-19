@@ -26,7 +26,9 @@ pub mod mov;
 /// All structs for resize commands
 pub mod resize;
 
+use std::collections::HashMap;
 use std::fmt::{Display as FmtDisplay, Formatter, Result as FmtResult};
+use std::hash::Hash;
 use serde::{Serialize, Deserialize};
 use serde::de::{Visitor, Error, Unexpected, Deserializer};
 use strum::Display;
@@ -168,13 +170,46 @@ impl<T: FmtDisplay> ArgList<T> {
     }
 }
 
+/// An array of values.
+///
+/// A [Vec] would normally suffice for our purposes, but this struct implements [Display],
+/// [Default], and [Serialize]/[Deserialize] traits to be compatible with everything else.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct ArgMap<T: FmtDisplay + Eq + Hash>(HashMap<T, bool>);
+
+impl<T: FmtDisplay + Eq + Hash> FmtDisplay for ArgMap<T> {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "{}", self.0.keys()
+            .map(|a| if *self.0.get(a).unwrap_or(&false) { format!("{a} ") } else { String::new() })
+            .collect::<Vec<String>>()
+            .join(""))
+    }
+}
+
+impl<T: FmtDisplay + Eq + Hash> Default for ArgMap<T> {
+    fn default() -> Self {
+        Self(HashMap::new())
+    }
+}
+
+impl<T: FmtDisplay + Eq + Hash> ArgMap<T> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn from(map: HashMap<T, bool>) -> Self {
+        Self(map)
+    }
+}
+
 // since serde doesn't offer an easy way to support deserializing multiple types into a single enum,
 // we have to write our own `Visitor` and `Deserialize` traits for `TogglableBool`. This allows us
 // to represent `TogglableBool`s as booleans or strings
 impl<'de> Visitor<'de> for TogglableBool {
     type Value = TogglableBool;
 
-    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
         formatter.write_str("true, false, or toggle")
     }
 

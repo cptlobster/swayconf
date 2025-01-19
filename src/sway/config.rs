@@ -247,12 +247,14 @@ mod tests {
         let mut keys = HashMap::new();
         keys.insert("Mod4+Shift".to_string(), KeylessBindsym::new(ArgList::<bind::Bind>::default(), Runtime::Exec(ExecParams::String("ls -la ~".to_string()))));
         keys.insert("Mod4+X".to_string(), KeylessBindsym::new(ArgList::<bind::Bind>::default(), Runtime::Exec(ExecParams::String("~/beans.sh".to_string()))));
-
+        keys.insert("Mod4+Shift+Q".to_string(), KeylessBindsym::new(ArgList::<bind::Bind>::default(), Runtime::Kill));
+        
         config.bindsym = Some(keys);
         
         config.bar = Some(Bar{ id: "".to_string(), status_command: "i3blocks".to_string() });
 
-        println!("{}", config.to_string());
+        println!("{}", toml::to_string(&config).unwrap());
+        println!("{}", &config.to_string());
     }
 
     #[test]
