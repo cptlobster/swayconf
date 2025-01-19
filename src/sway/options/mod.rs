@@ -26,6 +26,7 @@ pub mod mov;
 /// All structs for resize commands
 pub mod resize;
 
+use subenum::subenum;
 use std::collections::HashMap;
 use std::fmt::{Display as FmtDisplay, Formatter, Result as FmtResult};
 use std::hash::Hash;
@@ -136,6 +137,54 @@ impl Default for Units {
     fn default() -> Self { Units::Px }
 }
 
+#[subenum(DefaultBorder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
+pub enum Border {
+    #[subenum(DefaultBorder)]
+    None,
+    #[subenum(DefaultBorder)]
+    #[strum(to_string = "normal {0}")]
+    Normal(u8),
+    #[subenum(DefaultBorder)]
+    #[strum(to_string = "pixel {0}")]
+    Pixel(u8),
+    #[serde(alias = "client", alias = "client-side")]
+    Csd,
+    Toggle
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
+pub enum DefaultOrientation {
+    #[serde(alias = "h")]
+    Horizontal,
+    #[serde(alias = "v")]
+    Vertical,
+    Auto
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case", untagged)]
+#[strum(serialize_all = "snake_case")]
+pub enum MaxRenderTimeOpts {
+    Off,
+    #[strum(to_string = "{0}")]
+    Ms(u8)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case", untagged)]
+#[strum(serialize_all = "snake_case")]
+pub enum RenameOpts {
+    #[strum(to_string = "to {0}")]
+    Current(String),
+    #[strum(to_string = "{old} to {new}")]
+    Existing{ old: String, new: String },
+}
+
 /// An array of values.
 ///
 /// A [Vec] would normally suffice for our purposes, but this struct implements [Display],
@@ -201,7 +250,7 @@ impl<T: FmtDisplay + Eq + Hash> ArgMap<T> {
     pub fn from(map: HashMap<T, bool>) -> Self {
         Self(map)
     }
-    
+
     pub fn insert(&mut self, key: T, value: bool) -> Option<bool> {
         self.0.insert(key, value)
     }

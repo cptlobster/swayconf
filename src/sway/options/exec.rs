@@ -15,7 +15,7 @@
 
 use serde::{Deserialize, Serialize};
 use strum::Display;
-use crate::sway::options::{ArgList, ArgMap};
+use crate::sway::options::{ArgMap};
 
 #[derive(PartialEq, Eq, Clone, Debug, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case", untagged)]

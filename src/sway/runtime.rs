@@ -19,7 +19,7 @@ use crate::sway::options;
 use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgMap};
 
 /// Runtime commands for Sway.
-/// 
+///
 /// Fun little piece of lore for writing your own configs: for enum variants that do not take
 /// parameters, you have to represent them as "null" types for [serde] to not throw errors. The only
 /// way to normally do this in TOML is like so:
@@ -50,6 +50,8 @@ pub enum Runtime {
         #[serde(flatten)]
         command: Box<Runtime>
     },
+    #[strum(to_string = "border {0}")]
+    Border(options::Border),
     #[strum(to_string = "exec {0}")]
     Exec(exec::ExecParams),
     #[strum(to_string = "exec_always {0}")]
@@ -62,12 +64,18 @@ pub enum Runtime {
     Kill,
     #[strum(to_string = "layout {0}")]
     Layout(layout::LayoutParams),
+    #[strum(to_string = "max_render_time {0}")]
+    MaxRenderTime(options::MaxRenderTimeOpts),
     #[strum(to_string = "move {0}")]
     Move(mov::MoveParams),
     Nop,
     Reload,
+    #[strum(to_string = "rename workspace {0}")]
+    Rename(options::RenameOpts),
     #[strum(to_string = "resize {0}")]
     Resize(resize::ResizeParams),
+    #[strum(to_string = "scratchpad show")]
+    Scratchpad,
     #[strum(to_string = "split {0}")]
     Split(options::Split),
     #[strum(to_string = "set ${name} {value}")]
@@ -75,6 +83,10 @@ pub enum Runtime {
         name: String,
         value: String
     },
+    #[strum(to_string = "sticky {0}")]
+    Sticky(options::TogglableBool),
+    #[strum(to_string = "title_format {0}")]
+    TitleFormat(String),
     #[strum(to_string = "workspace {0}")]
     Workspace(options::Workspace),
 }

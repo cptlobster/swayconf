@@ -38,12 +38,16 @@ pub enum LayoutCycleParams {
     Multi(ArgList<LayoutCycleMulti>)
 }
 
+#[subenum(ConfigLayout)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum Layout {
+    #[subenum(ConfigLayout)]
     Default,
+    #[subenum(ConfigLayout)]
     Stacking,
+    #[subenum(ConfigLayout)]
     Tabbed,
     #[serde(alias = "splith")]
     #[strum(serialize = "splith")]
