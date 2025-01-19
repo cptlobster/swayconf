@@ -23,6 +23,8 @@ pub mod layout;
 pub mod focus;
 /// All structs for move commands
 pub mod mov;
+/// All structs for resize commands
+pub mod resize;
 
 use std::fmt::{Display as FmtDisplay, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};

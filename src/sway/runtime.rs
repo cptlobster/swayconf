@@ -16,7 +16,7 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
-use crate::sway::options::{bind, exec, focus, layout, mov, ArgList};
+use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgList};
 
 /// Runtime commands for Sway.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
@@ -54,6 +54,8 @@ pub enum Runtime {
     Move(mov::MoveParams),
     Nop,
     Reload,
+    #[strum(to_string = "resize {0}")]
+    Resize(resize::ResizeParams),
     #[strum(to_string = "split {0}")]
     Split(options::Split),
     #[strum(to_string = "set ${name} {value}")]
