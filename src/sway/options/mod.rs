@@ -22,6 +22,7 @@ pub mod layout;
 /// All structs for focus commands
 pub mod focus;
 
+use std::fmt::{Display as FmtDisplay, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};
 use serde::de::{Visitor, Error, Unexpected, Deserializer};
 use strum::Display;
@@ -112,6 +113,36 @@ pub enum Directional {
     Down,
     Left,
     Right,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct ArgList<T: FmtDisplay>(Vec<T>);
+
+impl<T: FmtDisplay> FmtDisplay for ArgList<T> {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "{}", self.0
+            .iter()
+            .map(|a| format!("{a} "))
+            .collect::<Vec<String>>()
+            .join(""))
+    }
+}
+
+impl<T: FmtDisplay> Default for ArgList<T> {
+    fn default() -> Self {
+        Self(Vec::new())
+    }
+}
+
+impl<T: FmtDisplay> ArgList<T> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+    
+    pub fn from(vec: Vec<T>) -> Self {
+        Self(vec)
+    }
 }
 
 // since serde doesn't offer an easy way to support deserializing multiple types into a single enum,

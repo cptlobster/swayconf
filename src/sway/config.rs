@@ -16,12 +16,12 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Serialize, Deserialize};
-use crate::sway::options::{bind, exec};
+use crate::sway::options::{bind, exec, ArgList};
 use crate::sway::options::exec::ExecParams;
 use crate::sway::runtime::Runtime;
 
 /// Basic structure for a config file.
-/// 
+///
 /// By default, Sway allows for configuration commands to be input in arbitrary order. While this
 /// structure has a much more rigid arrangement than Sway normally allows, this provides much
 /// simpler compatibility with Serde and allows for formatting your configs in TOML.
@@ -77,13 +77,13 @@ pub struct Config {
 #[serde(rename_all = "kebab-case")]
 pub struct KeylessBindsym {
     #[serde(default)]
-    flags: bind::BindFlags,
+    flags: ArgList<bind::Bind>,
     #[serde(flatten)]
     command: Runtime
 }
 
 impl KeylessBindsym {
-    pub fn new(flags: bind::BindFlags, command: Runtime) -> Self {
+    pub fn new(flags: ArgList<bind::Bind>, command: Runtime) -> Self {
         Self { flags, command }
     }
 }
@@ -239,8 +239,8 @@ mod tests {
         );
 
         let mut keys = HashMap::new();
-        keys.insert("Mod4+Shift".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec(ExecParams::String("ls -la ~".to_string()))));
-        keys.insert("Mod4+X".to_string(), KeylessBindsym::new(bind::BindFlags::default(), Runtime::Exec(ExecParams::String("~/beans.sh".to_string()))));
+        keys.insert("Mod4+Shift".to_string(), KeylessBindsym::new(ArgList::<bind::Bind>::default(), Runtime::Exec(ExecParams::String("ls -la ~".to_string()))));
+        keys.insert("Mod4+X".to_string(), KeylessBindsym::new(ArgList::<bind::Bind>::default(), Runtime::Exec(ExecParams::String("~/beans.sh".to_string()))));
 
         config.bindsym = Some(keys);
         

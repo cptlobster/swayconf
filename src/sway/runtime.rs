@@ -16,7 +16,7 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
-use crate::sway::options::{bind, exec, focus, layout};
+use crate::sway::options::{bind, exec, focus, layout, ArgList};
 
 /// Runtime commands for Sway.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
@@ -25,7 +25,7 @@ pub enum Runtime {
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
     BindCode{
         #[serde(default)]
-        flags: bind::BindFlags,
+        flags: ArgList<bind::Bind>,
         keys: bind::BindCodes,
         #[serde(flatten)]
         command: Box<Runtime>
@@ -33,7 +33,7 @@ pub enum Runtime {
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
     BindSym {
         #[serde(default)]
-        flags: bind::BindFlags,
+        flags: ArgList<bind::Bind>,
         keys: bind::BindKeys,
         #[serde(flatten)]
         command: Box<Runtime>
@@ -73,12 +73,12 @@ mod tests {
     fn test_to_sway() {
         let cmd1 = Runtime::Exec(ExecParams::String("/bin/true".to_string()));
         let cmd2 = Runtime::BindSym {
-            flags: bind::BindFlags::default(),
+            flags: ArgList::<bind::Bind>::default(),
             keys: bind::BindKeys::from(vec!["Mod4".to_string(), "X".to_string()]),
             command: Box::new(Runtime::Exec(ExecParams::String("firefox".to_string()))),
         };
         let cmd3 = Runtime::BindSym {
-            flags: bind::BindFlags::from(vec![bind::Bind::ExcludeTitlebar]),
+            flags: ArgList::<bind::Bind>::from(vec![bind::Bind::ExcludeTitlebar]),
             keys: bind::BindKeys::from(vec!["Mod4".to_string(), "Shift".to_string()]),
             command: Box::new(Runtime::Exec(ExecParams::String("ls -la ~".to_string()))),
         };

@@ -13,11 +13,10 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::ops::Deref;
-use std::fmt::{Display, Formatter, Result as FmtResult};
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use subenum::subenum;
+use crate::sway::options::ArgList;
 
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -36,7 +35,7 @@ pub enum LayoutCycleParams {
     #[strum(serialize = "{0}")]
     Single(LayoutCycleSingle),
     #[strum(serialize = "{0}")]
-    Multi(LayoutCycleMultiList)
+    Multi(ArgList<LayoutCycleMulti>)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
@@ -75,42 +74,4 @@ pub enum LayoutCycle {
     SplitV,
     #[subenum(LayoutCycleSingle)]
     All,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(transparent)]
-pub struct LayoutCycleMultiList(Vec<LayoutCycleMulti>);
-
-impl Deref for LayoutCycleMultiList {
-    type Target = Vec<LayoutCycleMulti>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl Display for LayoutCycleMultiList {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.0
-            .iter()
-            .map(|a| format!("{a} "))
-            .collect::<Vec<String>>()
-            .join(""))
-    }
-}
-
-impl Default for LayoutCycleMultiList {
-    fn default() -> Self {
-        Self(Vec::new())
-    }
-}
-
-impl LayoutCycleMultiList {
-    pub fn new() -> Self {
-        LayoutCycleMultiList::default()
-    }
-
-    pub fn from(vec: Vec<LayoutCycleMulti>) -> Self {
-        LayoutCycleMultiList(vec)
-    }
 }

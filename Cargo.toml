@@ -19,7 +19,6 @@ description = "Configuration generator for the Sway window manager"
 authors = ["Dustin Thomas <io@cptlobster.dev>"]
 
 license = "GPL-3"
-license-file = "LICENSE.md"
 
 edition = "2021"
 
