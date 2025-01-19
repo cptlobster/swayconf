@@ -44,9 +44,6 @@
 /// 
 /// Full documentation on the actual effects of these commands is available in the sway(5) manpage.
 mod sway;
-/// TOML config mapping (deprecated)
-// TODO: DELETE THIS MODULE
-mod tomlcfg;
 
 use std::fs;
 use std::fs::File;

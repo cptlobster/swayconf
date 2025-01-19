@@ -16,7 +16,7 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
-use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgList, ArgMap};
+use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgMap};
 
 /// Runtime commands for Sway.
 /// 
@@ -89,12 +89,14 @@ mod tests {
     fn test_to_sway() {
         let cmd1 = Runtime::Exec(ExecParams::String("/bin/true".to_string()));
         let cmd2 = Runtime::BindSym {
-            flags: ArgList::<bind::Bind>::default(),
+            flags: ArgMap::<bind::Bind>::default(),
             keys: bind::BindKeys::from(vec!["Mod4".to_string(), "X".to_string()]),
             command: Box::new(Runtime::Exec(ExecParams::String("firefox".to_string()))),
         };
+        let mut am = ArgMap::<bind::Bind>::default();
+        am.insert(bind::Bind::ExcludeTitlebar, true);
         let cmd3 = Runtime::BindSym {
-            flags: ArgList::<bind::Bind>::from(vec![bind::Bind::ExcludeTitlebar]),
+            flags: am,
             keys: bind::BindKeys::from(vec!["Mod4".to_string(), "Shift".to_string()]),
             command: Box::new(Runtime::Exec(ExecParams::String("ls -la ~".to_string()))),
         };

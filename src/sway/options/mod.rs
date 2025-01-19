@@ -201,6 +201,10 @@ impl<T: FmtDisplay + Eq + Hash> ArgMap<T> {
     pub fn from(map: HashMap<T, bool>) -> Self {
         Self(map)
     }
+    
+    pub fn insert(&mut self, key: T, value: bool) -> Option<bool> {
+        self.0.insert(key, value)
+    }
 }
 
 // since serde doesn't offer an easy way to support deserializing multiple types into a single enum,

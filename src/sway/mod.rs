@@ -12,7 +12,6 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-pub mod legacy;
 /// Runtime command enumeration.
 /// 
 /// This module should ONLY contain the enum for runtime commands, all options should be handled in
