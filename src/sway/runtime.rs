@@ -12,10 +12,11 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use crate::sway::options;
-use crate::sway::options::{bind, exec};
+use crate::sway::options::{bind, exec, layout};
 
 /// Runtime commands for Sway.
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
@@ -44,6 +45,9 @@ pub enum Runtime {
     Exit,
     #[strum(to_string = "floating {0}")]
     Floating(options::TogglableBool),
+    Kill,
+    #[strum(to_string = "layout {0}")]
+    Layout(layout::LayoutParams),
     Nop,
     Reload,
     #[strum(to_string = "split {0}")]

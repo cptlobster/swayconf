@@ -17,6 +17,8 @@
 pub mod bind;
 /// All structs for exec commands
 pub mod exec;
+/// All structs for layout commands
+pub mod layout;
 
 use serde::{Serialize, Deserialize};
 use serde::de::{Visitor, Error, Unexpected, Deserializer};
@@ -52,6 +54,7 @@ pub enum Split {
     None,
 }
 
+/// Different forms of workspace command options.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case", untagged)]
 #[strum(serialize_all = "kebab-case")]
@@ -64,6 +67,47 @@ pub enum Workspace {
         #[serde(default)]
         name: String
     },
+}
+
+/// Options for parent/child hierarchy.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum Hierarchy {
+    Parent,
+    Child,
+}
+
+/// Options for sibling hierarchy.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum FocusSibling {
+    #[serde(alias = "previous")]
+    Prev,
+    Next,
+}
+
+/// Options for relative workspace commands
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum RelWorkspace {
+    #[serde(alias = "previous")]
+    Prev,
+    Next,
+    Current,
+}
+
+/// Options for directional arguments
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
+pub enum Directional {
+    Up,
+    Down,
+    Left,
+    Right,
 }
 
 // since serde doesn't offer an easy way to support deserializing multiple types into a single enum,
