@@ -53,6 +53,21 @@ use std::path::{PathBuf};
 use thiserror::Error;
 use sway::config::Config;
 use derive_more::{From};
+use clap::Parser;
+use clio::{InputPath, OutputPath, ClioPath};
+
+/// Configuration generator for the Sway window manager.
+#[derive(Parser)]
+#[command(version, about)]
+struct Args {
+    /// The TOML file to read from. Defaults to "./config.toml" if unspecified.
+    #[arg(short, long, value_parser, default_value = "./config.toml")]
+    input_file: InputPath,
+    /// The location to output the Sway config file to. If unspecified, uses the same path as the
+    /// input file, but with the ".toml" extension stripped.
+    #[arg(short, long, value_parser)]
+    output_file: Option<OutputPath>,
+}
 
 #[derive(Debug, Error, From)]
 enum SwayconfError {
@@ -78,19 +93,23 @@ fn write(path: &PathBuf, cfg: Config) -> Result<usize, IoError> {
 }
 
 /// Main entrypoint
-// TODO: rewrite so that it doesn't use the legacy module
 fn main() {
     env_logger::init();
-    
-    let path = PathBuf::from("samples/config.toml");
+
+    let args = Args::parse();
+
+    let path = args.input_file.path().to_path_buf();
     match convert(&path) {
         Ok(cfg) => {
             log::info!("Successfully converted {:?}", &path);
             log::trace!("{:#?}", &cfg);
-            let new_path = path.with_extension("");
-            match write(&new_path, cfg) {
-                Ok(_) => log::info!("Successfully wrote to {}", &new_path.display()),
-                Err(e) => log::error!("Error writing config: {}", e),
+            let write_path = match args.output_file {
+                Some(p) => p.path().to_path_buf(),
+                None => path.with_extension("")
+            };
+            match write(&write_path, cfg) {
+                Ok(_) => log::info!("Successfully wrote to {}", &write_path.display()),
+                Err(e) => log::error!("Failed to write to {}: {}", &write_path.display(), e),
             }
         }
         Err(err) => {

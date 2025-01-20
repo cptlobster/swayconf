@@ -157,6 +157,7 @@ fn with_comment_header(section: String, header: String) -> String {
 }
 
 fn stringify_sets(sets: &Option<HashMap<String, String>>) -> String {
+    log::debug!("Converting set commands...");
     match sets {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -172,6 +173,7 @@ fn stringify_sets(sets: &Option<HashMap<String, String>>) -> String {
 }
 
 fn stringify_defaults (defaults: &Option<Defaults>) -> String {
+    log::debug!("Converting default workspace settings...");
     match defaults {
         Some(d) => {
             let res0 = d.to_string();
@@ -187,6 +189,7 @@ fn stringify_defaults (defaults: &Option<Defaults>) -> String {
 }
 
 fn stringify_bindsyms(bindsym: &Option<HashMap<String, KeylessBindsym>>) -> String {
+    log::debug!("Converting bindsyms...");
     match bindsym {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -204,6 +207,7 @@ fn stringify_bindsyms(bindsym: &Option<HashMap<String, KeylessBindsym>>) -> Stri
 }
 
 fn stringify_bindcodes(bindcode: &Option<HashMap<String, KeylessBindsym>>) -> String {
+    log::debug!("Converting bindcodes...");
     match bindcode {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -221,6 +225,7 @@ fn stringify_bindcodes(bindcode: &Option<HashMap<String, KeylessBindsym>>) -> St
 }
 
 fn stringify_exec(exec: &Option<Vec<exec::ExecParams>>) -> String {
+    log::debug!("Converting startup applications (exec)...");
     match exec {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -238,6 +243,7 @@ fn stringify_exec(exec: &Option<Vec<exec::ExecParams>>) -> String {
 }
 
 fn stringify_exec_always(exec_always: &Option<Vec<exec::ExecParams>>) -> String {
+    log::debug!("Converting startup applications (exec_always)...");
     match exec_always {
         Some(s) => {
             if s.is_empty() {String::new()}
@@ -253,6 +259,7 @@ fn stringify_exec_always(exec_always: &Option<Vec<exec::ExecParams>>) -> String 
 }
 
 fn stringify_bar (bar: &Option<Bar>) -> String {
+    log::debug!("Converting bar commands...");
     match bar {
         Some(b) => with_comment_header(b.to_string(), "Swaybar configuration".to_string()),
         None => String::new()
