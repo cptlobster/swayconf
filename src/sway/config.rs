@@ -102,7 +102,7 @@ impl Display for Defaults {
         let floating_border = match self.floating_border {
             Some(ref w) => format!("default_floating_border {}\n", w),
             None => String::new()
-        }
+        };
         write!(f, "{}{}{}{}", layout, orientation, border, floating_border)
     }
 }

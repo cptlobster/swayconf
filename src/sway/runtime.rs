@@ -61,6 +61,12 @@ pub enum Runtime {
     Floating(options::TogglableBool),
     #[strum(to_string = "focus {0}")]
     Focus(focus::FocusParams),
+    #[strum(to_string = "for_window {criteria} {command}")]
+    ForWindow {
+        criteria: String, 
+        #[serde(flatten)]
+        command: Box<Runtime>
+    },
     Kill,
     #[strum(to_string = "layout {0}")]
     Layout(layout::LayoutParams),

@@ -25,6 +25,8 @@ pub mod focus;
 pub mod mov;
 /// All structs for resize commands
 pub mod resize;
+/// All structs for client commands
+pub mod client;
 
 use subenum::subenum;
 use std::collections::HashMap;
