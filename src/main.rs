@@ -50,6 +50,7 @@ use std::fs::File;
 use std::io::{Error as IoError, Write};
 use toml::de::Error as TomlError;
 use std::path::{PathBuf};
+use std::process::Command;
 use thiserror::Error;
 use sway::config::Config;
 use derive_more::{From};
@@ -67,6 +68,10 @@ struct Args {
     /// input file, but with the ".toml" extension stripped.
     #[arg(short, long, value_parser)]
     output_file: Option<OutputPath>,
+    /// Reload Sway if enabled. This can be used if you are writing directly to your Sway config
+    /// files.
+    #[arg(short, long, default_value = "false")]
+    reload: bool,
 }
 
 #[derive(Debug, Error, From)]
@@ -82,7 +87,7 @@ fn convert(path: &PathBuf) -> Result<Config, SwayconfError> {
     let str = fs::read_to_string(path)?;
     log::info!("Parsing configuration: {}", path.display());
     let cfg: Config = toml::from_str(&str)?;
-    log::info!("Everything went okay, continuing");
+    log::debug!("Everything went okay, continuing");
     Ok(cfg)
 }
 
@@ -90,6 +95,24 @@ fn write(path: &PathBuf, cfg: Config) -> Result<usize, IoError> {
     log::info!("Writing to file {}", path.display());
     let mut file = File::create(path.clone())?;
     file.write(cfg.to_string().as_bytes())
+}
+
+fn reload_sway() {
+    log::info!("Attempting to reload config via swaymsg...");
+    match Command::new("swaymsg").arg("reload").output() {
+        Ok(output) => {
+            log::debug!("{}", std::str::from_utf8(&*output.stdout).unwrap_or("Error reading stdout"));
+            if output.status.success() {
+                log::debug!("{}", std::str::from_utf8(&*output.stderr).unwrap_or("Error reading stderr"));
+                log::info!("swaymsg exited with status {}", output.status);
+            } else {
+                log::error!("swaymsg exited with status {}", output.status);
+                log::error!("Output of stderr:");
+                log::error!("{}", std::str::from_utf8(&*output.stderr).unwrap_or("Error reading stderr"));
+            }
+        }
+        Err(err) => {log::error!("swaymsg call failed: {}", err);}
+    }
 }
 
 /// Main entrypoint
@@ -101,14 +124,17 @@ fn main() {
     let path = args.input_file.path().to_path_buf();
     match convert(&path) {
         Ok(cfg) => {
-            log::info!("Successfully converted {:?}", &path);
+            log::info!("Successfully converted {}", &path.display());
             log::trace!("{:#?}", &cfg);
             let write_path = match args.output_file {
                 Some(p) => p.path().to_path_buf(),
                 None => path.with_extension("")
             };
             match write(&write_path, cfg) {
-                Ok(_) => log::info!("Successfully wrote to {}", &write_path.display()),
+                Ok(_) => {
+                    log::info!("Successfully wrote to {}", &write_path.display());
+                    if args.reload { reload_sway() }
+                },
                 Err(e) => log::error!("Failed to write to {}: {}", &write_path.display(), e),
             }
         }
