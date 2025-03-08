@@ -15,7 +15,8 @@
 
 use serde::{Deserialize, Serialize};
 use strum::Display;
-use crate::sway::options;
+use crate::sway::{criteria, options};
+use crate::sway::criteria::CriteriaVec;
 use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgMap};
 
 /// Runtime commands for Sway.
@@ -34,6 +35,8 @@ use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgMap};
 #[serde(rename_all = "kebab-case", rename_all_fields = "kebab-case")]
 #[strum(serialize_all = "snake_case")]
 pub enum Runtime {
+    #[strum(to_string = "allow_tearing {0}")]
+    AllowTearing(bool),
     #[strum(to_string = "bindsym {flags}{keys} {command}")]
     BindCode{
         #[serde(default, flatten)]
@@ -61,9 +64,11 @@ pub enum Runtime {
     Floating(options::TogglableBool),
     #[strum(to_string = "focus {0}")]
     Focus(focus::FocusParams),
+    #[strum(to_string = "{0} focus")]
+    CriteriaFocus(CriteriaVec),
     #[strum(to_string = "for_window {criteria} {command}")]
     ForWindow {
-        criteria: String, 
+        criteria: CriteriaVec,
         #[serde(flatten)]
         command: Box<Runtime>
     },
@@ -82,6 +87,8 @@ pub enum Runtime {
     Resize(resize::ResizeParams),
     #[strum(to_string = "scratchpad show")]
     Scratchpad,
+    #[strum(to_string = "shortcuts_inhibitor {0}")]
+    ShortcutsInhibitor(bool),
     #[strum(to_string = "split {0}")]
     Split(options::Split),
     #[strum(to_string = "set ${name} {value}")]
@@ -91,6 +98,8 @@ pub enum Runtime {
     },
     #[strum(to_string = "sticky {0}")]
     Sticky(options::TogglableBool),
+    #[strum(to_string = "swap container with {0}")]
+    Swap(options::Swap),
     #[strum(to_string = "title_format {0}")]
     TitleFormat(String),
     #[strum(to_string = "workspace {0}")]

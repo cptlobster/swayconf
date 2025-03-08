@@ -27,3 +27,4 @@ pub mod options;
 /// This has a rigid structure for config-only commands, so that [serde] can assemble/disassemble
 /// TOML in a way that is even moderately comprehensible.
 pub mod config;
+mod criteria;

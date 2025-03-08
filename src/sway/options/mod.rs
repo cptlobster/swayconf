@@ -169,6 +169,18 @@ pub enum DefaultOrientation {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "snake_case")]
+pub enum Swap {
+    #[strum(to_string = "id {0}")]
+    Id(String),
+    #[strum(to_string = "con_id {0}")]
+    ConId(String),
+    #[strum(to_string = "mark {0}")]
+    Mark(String)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "kebab-case", untagged)]
 #[strum(serialize_all = "snake_case")]
 pub enum MaxRenderTimeOpts {
