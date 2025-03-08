@@ -66,6 +66,8 @@ pub struct Config {
     /// Default orientation and workspace layout
     #[serde(default)]
     default: Option<Defaults>,
+    #[serde(default)]
+    modes: Option<Modes>,
     /// User-defined bindsym commands
     #[serde(default)]
     bindsym: Option<HashMap<String, KeylessBindsym>>,
@@ -74,6 +76,38 @@ pub struct Config {
     bindcode: Option<HashMap<String, KeylessBindsym>>,
     #[serde(default)]
     bar: Option<Bar>,
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct Modes (HashMap<String, ModeCfg>);
+
+impl Display for Modes {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        for (k, v) in self.0.iter() {
+            log::debug!("Converting mode {}...", k);
+            let header = format!("# Configuration for mode {}", k);
+            write!(f, "{}\nmode {} {{\n{}\n}}\n", header, k, indent(&v.to_string(), 4))?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct ModeCfg {
+    // User defined bindsym commands for this mode
+    bindsym: Option<HashMap<String, KeylessBindsym>>,
+    // User defined bindcode commands for this mode
+    bindcode: Option<HashMap<String, KeylessBindsym>>,
+}
+
+impl Display for ModeCfg {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        let bindsym = stringify_bindsyms(&self.bindsym);
+        let bindcode = stringify_bindcodes(&self.bindcode);
+        write!(f, "{}{}", bindsym, bindcode)
+    }
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize)]
@@ -149,6 +183,11 @@ impl Bar {
     fn new(id: String, status_command: String) -> Self {
         Bar{ id, status_command }
     }
+}
+
+fn indent(content: &str, level: u8) -> String {
+    let ind = (0..level).map(|_| " ").collect::<String>();
+    content.lines().map(|s| format!("{}{}", ind, s)).collect::<Vec<String>>().join("\n")
 }
 
 fn with_comment_header(section: String, header: String) -> String {
@@ -266,6 +305,14 @@ fn stringify_bar (bar: &Option<Bar>) -> String {
     }
 }
 
+fn stringify_modes (modes: &Option<Modes>) -> String {
+    log::debug!("Converting modes...");
+    match modes {
+        Some(m) => with_comment_header(m.to_string(), "Mode configuration".to_string()),
+        None => String::new()
+    }
+}
+
 impl Display for Config {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let header =
@@ -274,12 +321,13 @@ impl Display for Config {
             \nwill need to run `sway -c [config file] -C` to do so.\
             \n\
             \nFor more information, please visit https://github.com/cptlobster/swayconf.";
-        write!(f, "{}{}{}{}{}{}{}{}",
+        write!(f, "{}{}{}{}{}{}{}{}{}",
                with_comment_header(String::new(), header.to_string()),
                stringify_sets(&self.set),
                stringify_exec(&self.exec),
                stringify_exec_always(&self.exec_always),
                stringify_defaults(&self.default),
+               stringify_modes(&self.modes),
                stringify_bindsyms(&self.bindsym),
                stringify_bindcodes(&self.bindcode),
                stringify_bar(&self.bar)

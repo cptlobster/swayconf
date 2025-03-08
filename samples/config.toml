@@ -4,12 +4,15 @@ version = "0.1"
 # Startup applications (these will be called with exec)
 # To add commands to be executed on config reloads too, create an exec_always entry)
 exec = [
+    { command = "uwsm finalize SWAYSOCK I3SOCK XCURSOR_SIZE XCURSOR_THEME", no-startup-id = true},
     { command = "dex --autostart --environment sway", no-startup-id = true },
     "swayidle -w timeout 300 $lock_sh before-sleep $lock_sh",
     { command = "nm-applet --sm-disable", no-startup-id = true },
     { command = "blueman-applet", no-startup-id = true },
     { command = "mako", no-startup-id = true },
-    { command = "swaybg -i $bg_file -m fill", no-startup-id = true }
+    { command = "swaybg -i $bg_file -m fill", no-startup-id = true },
+    { command = "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1", no-startup-id = true },
+    { command = "kanshi", no-startup-id = true }
 ]
 
 tiling-drag = true
@@ -30,11 +33,11 @@ size = 12
 
 # for_window rules
 [[for-window]]
-rule = { class = "(?i)gscreenshot" }
+rule = [{ class = "(?i)gscreenshot" }]
 floating = "enable"
 
 [[for-window]]
-rule = { window-role = "Toplevel" }
+rule = [{ window-role = "Toplevel" }]
 floating = "enable"
 
 [set]
@@ -58,12 +61,12 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 # kill currently focused window
 "$mod+Shift+Q".kill = {}
 # launch applications
-"$mod+Return".exec = "alacritty"
-"$mod+Shift+space".exec = "rofi -combi-modi window,drun,ssh -show combi"
-"Mod4+Control+Mod1+Shift+l".exec = "xdg-open https://www.linkedin.com"
+"$mod+Return".exec = "uwsm app -- alacritty"
+"$mod+Shift+space".exec = "rofi -show drun -run-command \"uwsm app -- {cmd}\""
+"Mod4+Control+Mod1+Shift+l".exec = "uwsm app -- xdg-open https://www.linkedin.com"
 # Screenshots
 "$mod+Control+s".exec = "gscreenshot"
-"$mod+Shift+s".exec = "gscreenshot -s -c -n"
+"$mod+Shift+s".exec = "uwsm app -- grim -g \"$(slurp -d)\" - | wl-copy -t image/png"
 "$mod+Mod1+s".exec = "gscreenshot -c -n"
 # focus windows
 "$mod+Up".focus.directional = "up"
@@ -110,6 +113,9 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 "$mod+Shift+8".move.container = 8
 "$mod+Shift+9".move.container = 9
 "$mod+Shift+0".move.container = 10
+"$mod+Shift+Tab".move.container = "scratchpad"
+# show scratchpad
+"$mod+Tab".scratchpad = {}
 # media controls
 "XF86AudioRaiseVolume".exec = { command = "$ch_vol_sh +5% && $refresh_i3status", no-startup-id = true }
 "XF86AudioLowerVolume".exec = { command = "$ch_vol_sh -5% && $refresh_i3status", no-startup-id = true }
@@ -121,7 +127,6 @@ refresh_i3status = "pkill -RTMIN+10 i3blocks"
 "XF86AudioPrev".exec = { command = "playerctl previous", no-startup-id = true }
 # config
 "$mod+Shift+c".reload = {}
-#"$mod+Shift+r".restart = true
 # power options
 "$mod+l".exec = { command = "$lock_sh", no-startup-id = true }
 "$mod+Shift+e".exec = "rofi -show p -modi p:rofi-power-menu"

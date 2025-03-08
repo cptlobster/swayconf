@@ -15,7 +15,7 @@
 
 use serde::{Deserialize, Serialize};
 use strum::Display;
-use crate::sway::{criteria, options};
+use crate::sway::{options};
 use crate::sway::criteria::CriteriaVec;
 use crate::sway::options::{bind, exec, focus, layout, mov, resize, ArgMap};
 
@@ -77,6 +77,8 @@ pub enum Runtime {
     Layout(layout::LayoutParams),
     #[strum(to_string = "max_render_time {0}")]
     MaxRenderTime(options::MaxRenderTimeOpts),
+    #[strum(to_string = "mode {0}")]
+    Mode(String),
     #[strum(to_string = "move {0}")]
     Move(mov::MoveParams),
     Nop,
