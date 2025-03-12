@@ -1,17 +1,19 @@
-//     Copyright (C) 2024  Dustin Thomas <io@cptlobster.dev>
+// <one line to give the program's name and a brief idea of what it does.>
+// Copyright (C) 2024, 2025 Dustin Thomas <stdio@cptlobster.dev>
 //
-//     This program is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
 //
-//     This program is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General Public License for more details.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//     You should have received a copy of the GNU General Public License
-//     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License along with
+// this program. If not, see <https://www.gnu.org/licenses/>.
+//
+
 /// Runtime command enumeration.
 /// 
 /// This module should ONLY contain the enum for runtime commands, all options should be handled in
@@ -27,4 +29,7 @@ pub mod options;
 /// This has a rigid structure for config-only commands, so that [serde] can assemble/disassemble
 /// TOML in a way that is even moderately comprehensible.
 pub mod config;
+/// Criteria generation.
 mod criteria;
+/// Autogen complex structures.
+mod autogen;
